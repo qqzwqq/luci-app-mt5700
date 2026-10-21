@@ -202,25 +202,7 @@ var Mt5700 = (function () {
 		return svg;
 	};
 
-	/*
-	 * 看板娘：保留头像本体（图片 + 悬浮动效），对话气泡功能已移除。
-	 * 之前的气泡会挤占英雄栏标题并在窄屏下遮挡内容，按需求不再提供。
-	 */
-	api.mascot = function () {
-		var wrap = E('div', { 'class': 'mt-mascot-speech-wrap' });
-
-		// 二次元蓝发猫耳看板娘头像图片，外圈带光环与悬浮动效
-		var avatar = E('div', { 'class': 'mt-mascot-avatar' });
-		var img = E('img', {
-			'class': 'mt-mascot-img',
-			'src': '/luci-static/resources/at-webserver/mascot.png?v=' + MT5700_CSS_VERSION,
-			'alt': '可可的看板娘'
-		});
-		avatar.appendChild(img);
-		wrap.appendChild(avatar);
-
-		return { el: wrap };
-	};
+    // 不创建看板娘区域，保留首页标题、描述和其他功能
 
 	/* ================= 四格动态信号图标 (cellular signal) =================
 	 *
