@@ -4,7 +4,7 @@
 
 OpenWrt / ImmortalWrt 平台下 MT5700M 5G 模组的全功能控制中心与守护套件
 
-[![Version](https://img.shields.io/badge/Version-v1.26.0-blue.svg?style=flat-square)](https://github.com/LianXia233/luci-app-mt5700/releases)
+[![Version](https://img.shields.io/badge/Version-v1.26.1-blue.svg?style=flat-square)](https://github.com/LianXia233/luci-app-mt5700/releases)
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-24.10%20%7C%2025.x-00C49F.svg?style=flat-square&logo=openwrt)](https://openwrt.org/)
 [![ImmortalWrt](https://img.shields.io/badge/ImmortalWrt-Compatible-orange.svg?style=flat-square)](https://immortalwrt.org/)
 [![Backend](https://img.shields.io/badge/Backend-Rust%20%7C%20Tokio-DEA584.svg?style=flat-square&logo=rust)](src/rust/)
@@ -41,6 +41,8 @@ OpenWrt / ImmortalWrt 平台下 MT5700M 5G 模组的全功能控制中心与守�
 | [UCI 配置参考](#uci-配置参考-etcconfigat-webserver) | [事件通知配置](#事件通知配置) |
 | [云编译与发布](#云编译与发布) | [更新日志](#更新日志) |
 | [源码目录结构](#源码目录结构) | [许可证与版权声明](#许可证与版权声明) |
+
+> 独立文档：**[短信链路协议与命令参考](docs/sms-at-protocol.md)**（发送/接收/读取三条链路的 AT 序列与取值理由、PDU 字段与编码表、删除语义、三层超时预算、命令速查与已核对报文）· [更新日志](CHANGELOG.md) · [各版本发布说明](docs/release-notes/)
 
 ---
 
@@ -99,8 +101,8 @@ OpenWrt / ImmortalWrt 平台下 MT5700M 5G 模组的全功能控制中心与守�
 | **数据与链路** | **拨号设置** | USB NDIS 拨号 / 转网口模式切换，承载网络链路状态守护与自动对账 |
 | | **模组设置** | 模组核心元数据查询（含自动识别的 USB 链路速率，sysfs 读取、不发 AT 命令）、SIM/USIM 卡管理（卡槽切换 / 热插拔 / PIN）、射频模式与 5G 增强（NR 载波聚合 / DSS / VoNR）、系统接入顺序与频段掩码、软硬件复位重启、出厂配置重置 |
 | | **模组升级** | 模组新固件远程推送检测与本地固件包上传刷写 |
-| **消息与运维** | **短信中心** | 支持 PDU / Text 短信收发、长短信自动分段重组、SIM 卡短信池查看；会话呈**聊天式单时间轴**（对方在左、自己在右，跨天插日期分隔条，气泡宽度随内容收缩） |
-| | **短信设置** | 自定义短信中心号（SMSC）、自动化短信转发与容量自清理策略 |
+| **消息与运维** | **短信中心** | 支持 PDU / Text 短信收发、长短信自动分段重组、SIM 卡短信池查看；会话呈**聊天式单时间轴**（对方在左、自己在右，跨天插日期分隔条，气泡宽度随内容收缩）。收发语义与命令细节见 **[短信链路协议与命令参考](docs/sms-at-protocol.md)** |
+| | **短信设置** | 自定义短信中心号（SMSC）、存储介质与清空、USSD 查询；开关背后的真实 AT 序列见 [短信链路协议与命令参考](docs/sms-at-protocol.md) 第 2 节 |
 | | **AT 调试终端** | Web 原生交互式控制台，支持常用指令自动补全、历史回溯与原语调试 |
 | | **通知日志** | 掉线告警、频段漂移记录，支持企业微信机器人、QQ 机器人（API v2）与 Webhook 实时推送 |
 | | **服务配置** | 守护进程参数、通信串口绑定、退避重试阈值与自愈巡检开关 |
@@ -225,11 +227,11 @@ grep OPENWRT_ARCH /etc/openwrt_release
 ```sh
 # 【OpenWrt 25.x / ImmortalWrt SNAPSHOT (apk)】
 apk add --allow-untrusted \
-   ./<ARCH>-luci-app-mt5700-1.26.0-r1.apk \
+   ./<ARCH>-luci-app-mt5700-1.26.1-r1.apk \
   ./<ARCH>-luci-i18n-mt5700-zh-cn-*.apk
 
 # 【OpenWrt 24.10 及更早版本 (opkg)】
-opkg install ./<ARCH>-luci-app-mt5700_1.26.0_<ARCH>.ipk
+opkg install ./<ARCH>-luci-app-mt5700_1.26.1_<ARCH>.ipk
 opkg install ./<ARCH>-luci-i18n-mt5700-zh-cn_*.ipk
 ```
 
@@ -474,6 +476,7 @@ option notify_tpl_batch  '喵～有一批新通知需要查看哦，快来看看
 
 | 版本 | 主题 |
 |:--|:--|
+| [v1.26.1](docs/release-notes/v1.26.1.md) | 短信收发链路逐条对照实机厂商实现修 7 处：0 号槽位永久删不掉、删除改按槽位降序、收件人号码先归一再编码、提交失败后写 ESC 清半开输入态、新短信按 `+CMTI` 上报的存储区对齐后再读、清空后还原 `AT+CPMS`、`delete` 缺超时条目导致批量删除被掐断并连带打开熔断；TP-VP 默认值纠正为 0xA7（24 小时）；新增《短信链路协议与命令参考》 |
 | [v1.26.0](docs/release-notes/v1.26.0.md) | 短信模块深度重构：Sms 最高优先级 + 暂停门/事务级互斥（后台轮询不再插队）、无缓存实时语义、发送结论三档（结果不明绝不重发）、PDU 编解码后端化；随包升级 rustls-webpki 0.103.16（RUSTSEC-2026-0382） |
 | [v1.25.2](docs/release-notes/v1.25.2.md) | 修复短信发不出去：提交字符 0x1A 被链路改写成字面量 `u001a`，改为单次写入；提交超时 2s → 40s |
 | [v1.25.1](docs/release-notes/v1.25.1.md) | 状态页三张卡片的内容底边齐平（网络状态卡片内部 75px 空白改为六格均分） |
@@ -502,7 +505,7 @@ option notify_tpl_batch  '喵～有一批新通知需要查看哦，快来看看
 
 ```
 luci-app-mt5700/
-├── Makefile                                # 顶层软件包构建定义 (PKG_VERSION=1.26.0)
+├── Makefile                                # 顶层软件包构建定义 (PKG_VERSION=1.26.1)
 ├── htdocs/luci-static/resources/
 │   ├── view/at-webserver/                  # 12 个 LuCI 页面前端视图脚本（见上方功能矩阵）
 │   └── at-webserver/                       # 前端支撑库 (rpc.js / parse.js / mt5700.js / ui.js / mt5700.css / tabmenu.js)
