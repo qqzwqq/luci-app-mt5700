@@ -296,6 +296,9 @@ pub fn decode_incoming_pdu(pdu_hex: &str) -> Result<Sms, String> {
     cut(&raw, &mut pos, smsc_len)?;
 
     let pdu_type = cut(&raw, &mut pos, 1)?[0];
+    if pdu_type & 0x03 != 0x00 {
+        return Err("不支持的 PDU 类型（仅支持 SMS-DELIVER）".into());
+    }
 
     let sender_digits = cut(&raw, &mut pos, 1)?[0] as usize;
     let sender_toa = cut(&raw, &mut pos, 1)?[0];
@@ -312,6 +315,13 @@ pub fn decode_incoming_pdu(pdu_hex: &str) -> Result<Sms, String> {
     let ts_bytes = cut(&raw, &mut pos, 7)?;
     let udl = cut(&raw, &mut pos, 1)?[0] as usize;
     let ud = &raw[pos..];
+    let required = match resolve_encoding(dcs) {
+        SmEncoding::Gsm7 => (udl * 7 + 7) / 8,
+        _ => udl,
+    };
+    if required > ud.len() {
+        return Err("PDU 用户数据长度与 UDL 不一致".into());
+    }
 
     let (content, partial) = decode_user_data(ud, udl, dcs, pdu_type & 0x40 != 0);
 
@@ -553,6 +563,11 @@ pub fn parse_cmgl_response(lines: &[String]) -> Vec<CmglEntry> {
         let pdu = lines[i + 1].trim();
         i += 2;
         if pdu.is_empty() || !pdu.chars().all(|c| c.is_ascii_hexdigit()) {
+            out.push(CmglEntry {
+                index, stat, direction_incoming: true, number: String::new(), content: String::new(),
+                time: None, time_approx: false, partial: None,
+                error: Some("PDU 行为空或含非十六进制字符".into()),
+            });
             continue;
         }
         let sms = decode_stored_pdu(pdu);
@@ -668,13 +683,19 @@ pub fn pick_encoding(message: &str) -> SmEncoding {
 fn encode_address(number: &str, is_smsc: bool, include_len: bool) -> Result<Vec<u8>, String> {
     let trimmed = number.trim();
     let has_plus = trimmed.starts_with('+');
-    let digits: String = trimmed.chars().filter(|c| c.is_ascii_digit()).collect();
-    if digits.is_empty() {
-        return Err("地址不含可编码的号码".into());
+    let digits = if has_plus { &trimmed[1..] } else { trimmed };
+    // 第二个 `+` 不可能通过下面的全数字检查，所以不必单独数 `+` 的个数。
+    if digits.is_empty() || !digits.bytes().all(|b| b.is_ascii_digit()) {
+        return Err("号码格式不正确（仅允许可选前导 + 和数字）".into());
     }
-    if digits.len() > 20 {
-        return Err("号码过长（超过 20 位）".into());
+    // 故意不支持 1–2 位短号/特服号：SUBMIT 的地址字段要按 TON/NPI 选类型，
+    // 这里固定 0x81/0x91（国内/国际 ISDN），把 10086、12345 这类按普通号码编
+    // 出来网络侧也不认。真要支持短号得先补 TON/NPI 分支，而不是放开长度下限。
+    // 与后端 `valid_phone_address`（3–20 位）保持同一口径，避免两边结论不一致。
+    if digits.len() < 3 || digits.len() > 20 {
+        return Err("号码长度不正确（应为 3 至 20 位）".into());
     }
+    let digits = digits.to_string();
     // TOA：国际格式（带 +）用 0x91，国内/unknown 用 0x81。
     let toa: u8 = if has_plus { 0x91 } else { 0x81 };
 
@@ -904,7 +925,10 @@ pub fn build_submit_parts(opts: &SubmitOptions) -> Result<SubmitPlan, String> {
     if concat {
         chunks = split_message(message, encoding, true);
     }
-    let parts_count = chunks.len().min(255) as u8;
+    if chunks.len() > 255 {
+        return Err("短信过长，超过 255 段拼接上限".into());
+    }
+    let parts_count = chunks.len() as u8;
     let reference = opts.reference.unwrap_or_else(|| {
         // 参考号只需在同一收件人的短窗口内不重复；用单调时钟的低字节足够。
         let seed = (monotonic_seed() % 255) as u8;
@@ -1031,11 +1055,30 @@ mod tests {
     const GSM7_PDU: &str = "00040B913108108300F000005280522100002305E8329BFD06";
 
     #[test]
+    fn rejects_more_than_255_concat_parts_and_invalid_addresses() {
+        let too_long = "测".repeat(67 * 255 + 1);
+        let opts = SubmitOptions { destination: "13800138000".into(), message: too_long, ..Default::default() };
+        assert!(build_submit_parts(&opts).unwrap_err().contains("255 段"));
+        for destination in ["12+3", "123,45", "123\rAT+CMGS=1"] {
+            let opts = SubmitOptions { destination: destination.into(), message: "x".into(), ..Default::default() };
+            assert!(build_submit_parts(&opts).is_err(), "should reject {destination:?}");
+        }
+    }
+
+    #[test]
     fn test_decode_ucs2_pdu() {
         let sms = decode_incoming_pdu(UCS2_PDU).unwrap();
         assert_eq!(sms.sender, "13800138000");
         assert_eq!(sms.content, "测试");
-        let want = localtime::from_ymdhms(2025, 8, 25, 12, 0, 0).unwrap();
+        // SCTS 是「短信中心本地时间 2025-08-25 12:00:00，偏移 +08:00」，
+        // 绝对时刻为 04:00 UTC。期望值必须按中心时区构造：早先用设备时区
+        // （localtime::from_ymdhms）换算，只有设备恰好也在东八区时才成立，
+        // 换到 UTC 环境就会误报。
+        let center = chrono::FixedOffset::east_opt(8 * 3600).unwrap();
+        let want = center
+            .with_ymd_and_hms(2025, 8, 25, 12, 0, 0)
+            .single()
+            .unwrap();
         assert_eq!(sms.date.timestamp(), want.timestamp());
         assert!(sms.partial.is_none());
     }
