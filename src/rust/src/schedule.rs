@@ -320,7 +320,7 @@ impl Scheduler {
         let actions = if done.is_empty() { "未执行任何操作".to_string() } else { done.join("、") };
         let notifier = self.notifier.clone();
         let content = format!(
-            "🔄 定时锁频切换\n时间: {}\n模式: {}\nLTE: {}\nNR: {}\n执行操作: {}\n切换次数: 第 {} 次\n结果: {}",
+            "定时锁频切换\n时间：{}\n模式：{}\nLTE：{}\nNR：{}\n执行操作：{}\n切换次数：第 {} 次\n结果：{}",
             crate::nettime::now().format("%Y-%m-%d %H:%M:%S"),
             mode,
             lock_summary("LTE", &cfg.lte),
@@ -331,7 +331,7 @@ impl Scheduler {
         );
         tokio::spawn(async move {
             notifier
-                .notify(Notification { sender: SENDER_SIGNAL.into(), content, kind: NotifyKind::Signal, memory_full: false, time: crate::notify::now_string() })
+                .notify(Notification { sender: SENDER_SIGNAL.into(), content, kind: NotifyKind::Signal, memory_full: false, time: crate::notify::now_string(), qq_card: None })
                 .await;
         });
         log_info!("定时锁频切换完成: {}（{}）", actions, if lock_ok { "成功" } else { "失败" });
