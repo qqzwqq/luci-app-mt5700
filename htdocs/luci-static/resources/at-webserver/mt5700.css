@@ -7808,38 +7808,47 @@ select option {
   }
 }
 
-/* ===== MT5700 暗色主题日志可读性优化 ===== */
 
-/* 日志面板 */
+/* =========================================================
+   MT5700 暗色主题综合可读性修复
+   包含：日志面板、日志行、日志文字、分类按钮、顶部导航栏
+   不依赖 data-theme="dark"
+   ========================================================= */
+
+
+/* ===== 1. 日志面板 ===== */
 .mt5700-logpanel {
     background: #111c2d !important;
     border-color: #344761 !important;
+    color: #e5edf8 !important;
 }
 
-/* 日志行 */
+
+/* ===== 2. 日志行 ===== */
 .mt5700-logrow {
     color: #e5edf8 !important;
     border-bottom-color: #28384e !important;
-    background-color: #152237 !important;
 }
 
 .mt5700-logrow:nth-child(even) {
-    background: #192941 !important;
+    background: #152237 !important;
 }
 
 .mt5700-logrow:hover {
     background: #20334d !important;
 }
 
-/* 日志文字 */
+/* 日志时间 */
 .mt5700-logtime {
     color: #a9bfd9 !important;
 }
 
+/* 日志正文 */
 .mt5700-logmsg {
     color: #e5edf8 !important;
 }
 
+/* 日志日期分隔栏 */
 .mt5700-logday-text {
     color: #c4b5fd !important;
 }
@@ -7851,34 +7860,102 @@ select option {
     border-color: #405675 !important;
 }
 
-/* 顶部提示栏 */
-.mt5700-logpanel-hint {
-    color: #f8fafc !important;
-    background: #202c40 !important;
-    border-color: #405675 !important;
+.mt5700-logcatbtn:hover {
+    background: #283b56 !important;
+    color: #ffffff !important;
 }
 
-.mt5700-logpanel-hint * {
-    color: #e2e8f0 !important;
+.mt5700-logcatbtn.active {
+    color: #ffffff !important;
+    background: #493778 !important;
+    border-color: #8b5cf6 !important;
 }
 
-/* 底部统计栏 */
-.mt5700-logfooter {
-    color: #f8fafc !important;
-    background: #202c40 !important;
-    border-color: #405675 !important;
+/* 分类数量徽章 */
+.mt5700-logcatbtn-count {
+    background: rgba(139, 92, 246, 0.22) !important;
+    color: #ddd6fe !important;
 }
 
-.mt5700-logfooter * {
-    color: #e2e8f0 !important;
-    opacity: 1 !important;
+/* 日志级别徽章 */
+.mt5700-logrow-dbg .mt5700-loglv {
+    color: #ddd6fe !important;
+    background: rgba(139, 92, 246, 0.24) !important;
 }
 
-/* 底部按钮保留紫色强调 */
-.mt5700-logfooter .mt5700-logscroll-btn {
+.mt5700-logrow-info .mt5700-loglv {
+    color: #86efac !important;
+    background: rgba(34, 197, 94, 0.18) !important;
+}
+
+.mt5700-logrow-warn .mt5700-loglv {
+    color: #fde68a !important;
+    background: rgba(245, 158, 11, 0.20) !important;
+}
+
+.mt5700-logrow-err .mt5700-loglv {
+    color: #fca5a5 !important;
+    background: rgba(239, 68, 68, 0.20) !important;
+}
+
+
+/* ===== 3. 日志长消息折叠按钮 ===== */
+.mt5700-logmsg-clamped .mt5700-logexpand {
+    background: rgba(22, 27, 46, 0.96) !important;
+    box-shadow: -8px 0 8px rgba(22, 27, 46, 0.96) !important;
     color: #c4b5fd !important;
-    background: #302750 !important;
-    border-color: #6955a6 !important;
 }
 
-/* ===== 优化结束 ===== */
+
+/* ===== 4. 日志快捷筛选开关 ===== */
+.mt5700-logerrwrn {
+    color: #fca5a5 !important;
+    background: rgba(248, 113, 113, 0.12) !important;
+    border-color: rgba(248, 113, 113, 0.45) !important;
+}
+
+
+/* ===== 5. 顶部导航栏整体 =====
+   注意：以下导航类名尚未通过 HTML 源码确认
+*/
+.mt5700-page .mt5700-nav,
+.mt5700-page .mt5700-tabs {
+    background: #242832 !important;
+    border-color: #3b4352 !important;
+}
+
+/* 未选中的导航文字和按钮 */
+.mt5700-page .mt5700-nav a,
+.mt5700-page .mt5700-tabs a,
+.mt5700-page .mt5700-nav button,
+.mt5700-page .mt5700-tabs button {
+    color: #cbd5e1 !important;
+}
+
+/* 导航图标 */
+.mt5700-page .mt5700-nav svg,
+.mt5700-page .mt5700-tabs svg {
+    color: #cbd5e1 !important;
+    stroke: currentColor !important;
+}
+
+/* 鼠标悬停 */
+.mt5700-page .mt5700-nav a:hover,
+.mt5700-page .mt5700-tabs a:hover,
+.mt5700-page .mt5700-nav button:hover,
+.mt5700-page .mt5700-tabs button:hover {
+    color: #ffffff !important;
+    background: #343b4a !important;
+}
+
+/* 当前选中的导航项 */
+.mt5700-page .mt5700-nav .active,
+.mt5700-page .mt5700-tabs .active,
+.mt5700-page .mt5700-nav a[aria-current="page"],
+.mt5700-page .mt5700-tabs a[aria-current="page"] {
+    color: #ffffff !important;
+    background: #303044 !important;
+    border-bottom: 2px solid #8b5cf6 !important;
+}
+
+/* ===== 综合修复结束 ===== */
