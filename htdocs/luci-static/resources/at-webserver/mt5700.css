@@ -7807,3 +7807,44 @@ select option {
     padding-right: 56px !important;
   }
 }
+
+
+/* ===== MT5700 暗色主题日志可读性优化 ===== */
+
+[data-theme="dark"] .mt5700-logpanel {
+    background: #111c2d !important;
+    border-color: #344761 !important;
+}
+
+[data-theme="dark"] .mt5700-logrow {
+    color: #e5edf8 !important;
+    border-bottom-color: #28384e !important;
+}
+
+[data-theme="dark"] .mt5700-logrow:nth-child(even) {
+    background: #152237 !important;
+}
+
+[data-theme="dark"] .mt5700-logrow:hover {
+    background: #20334d !important;
+}
+
+[data-theme="dark"] .mt5700-logtime {
+    color: #a9bfd9 !important;
+}
+
+[data-theme="dark"] .mt5700-logmsg {
+    color: #e5edf8 !important;
+}
+
+[data-theme="dark"] .mt5700-logday-text {
+    color: #c4b5fd !important;
+}
+
+[data-theme="dark"] .mt5700-logcatbtn {
+    color: #dce8f7 !important;
+    background: #1b2b42 !important;
+    border-color: #405675 !important;
+}
+
+/* ===== 优化结束 ===== */
