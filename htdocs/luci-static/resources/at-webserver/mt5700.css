@@ -7929,3 +7929,94 @@ select option {
 @media (prefers-color-scheme: dark){
   :root{--mt5700-card-bg:rgba(19,35,55,0.62)!important;--mt5700-card-bg-hover:rgba(26,53,77,0.74)!important}
 }
+
+
+/* v2.42.2 暗色主题与手机版选项卡修正
+ * 同时兼容 LuCI 常见暗色标记，避免仅依赖 [data-theme="dark"] 导致规则不生效。
+ */
+[data-darkmode="true"] .mt5700-logtabs,
+[data-theme="dark"] .mt5700-logtabs,
+.dark-theme .mt5700-logtabs,
+body[data-darkmode="true"] .mt5700-logtabs {
+  background: rgba(15, 23, 42, 0.88) !important;
+  border-color: rgba(129, 140, 248, 0.30) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.32), inset 0 1px 1px rgba(255,255,255,0.04) !important;
+}
+[data-darkmode="true"] .mt5700-logtab,
+[data-theme="dark"] .mt5700-logtab,
+.dark-theme .mt5700-logtab,
+body[data-darkmode="true"] .mt5700-logtab {
+  color: #cbd5e1 !important;
+}
+[data-darkmode="true"] .mt5700-logtab.active,
+[data-theme="dark"] .mt5700-logtab.active,
+.dark-theme .mt5700-logtab.active,
+body[data-darkmode="true"] .mt5700-logtab.active {
+  color: #fff !important;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+}
+
+/* 页面内部的分段标题/选项按钮：暗色下使用深底、浅字，选中态保留紫蓝强调色 */
+[data-darkmode="true"] .mt-tab-header,
+[data-theme="dark"] .mt-tab-header,
+.dark-theme .mt-tab-header,
+body[data-darkmode="true"] .mt-tab-header {
+  background: rgba(15, 23, 42, 0.82) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+}
+[data-darkmode="true"] .mt-tab-btn,
+[data-theme="dark"] .mt-tab-btn,
+.dark-theme .mt-tab-btn,
+body[data-darkmode="true"] .mt-tab-btn {
+  color: #cbd5e1 !important;
+}
+[data-darkmode="true"] .mt-tab-btn:hover,
+[data-theme="dark"] .mt-tab-btn:hover,
+.dark-theme .mt-tab-btn:hover,
+body[data-darkmode="true"] .mt-tab-btn:hover {
+  color: #c4b5fd !important;
+  background: rgba(139, 92, 246, 0.12) !important;
+}
+[data-darkmode="true"] .mt-tab-btn.active,
+[data-theme="dark"] .mt-tab-btn.active,
+.dark-theme .mt-tab-btn.active,
+body[data-darkmode="true"] .mt-tab-btn.active {
+  color: #e9d5ff !important;
+  background: rgba(79, 70, 229, 0.30) !important;
+  border-color: rgba(129, 140, 248, 0.38) !important;
+}
+
+/* 手机端允许标题选项横向滑动，避免标题被挤压或裁切 */
+@media (max-width: 768px) {
+  .mt-tab-header {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mt-tab-header::-webkit-scrollbar { display: none !important; }
+  .mt-tab-btn {
+    flex: 0 0 auto !important;
+    min-width: max-content !important;
+    padding: 9px 12px !important;
+  }
+  .mt5700-logtabs {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mt5700-logtabs::-webkit-scrollbar { display: none !important; }
+  .mt5700-logtab {
+    flex: 0 0 auto !important;
+    min-width: max-content !important;
+    padding: 8px 12px !important;
+  }
+}
