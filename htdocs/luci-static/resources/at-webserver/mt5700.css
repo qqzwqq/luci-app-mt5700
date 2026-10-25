@@ -7930,114 +7930,198 @@ select option {
   :root{--mt5700-card-bg:rgba(19,35,55,0.62)!important;--mt5700-card-bg-hover:rgba(26,53,77,0.74)!important}
 }
 
+/* =========================================================
+   MT5700 手机端适配修复
+   目标：
+   1. 日志区域使用深色背景，提高文字对比度
+   2. 日志正文自动换行，避免横向溢出
+   3. 视图切换、分类筛选和工具栏允许换行
+   4. 不依赖 data-theme
+   ========================================================= */
 
-/* v2.42.2 暗色主题与手机版选项卡修正
- * 同时兼容 LuCI 常见暗色标记，避免仅依赖 [data-theme="dark"] 导致规则不生效。
- */
-[data-darkmode="true"] .mt5700-logtabs,
-[data-theme="dark"] .mt5700-logtabs,
-.dark-theme .mt5700-logtabs,
-body[data-darkmode="true"] .mt5700-logtabs {
-  background: rgba(15, 23, 42, 0.88) !important;
-  border-color: rgba(129, 140, 248, 0.30) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.32), inset 0 1px 1px rgba(255,255,255,0.04) !important;
-}
-[data-darkmode="true"] .mt5700-logtab,
-[data-theme="dark"] .mt5700-logtab,
-.dark-theme .mt5700-logtab,
-body[data-darkmode="true"] .mt5700-logtab {
-  color: #cbd5e1 !important;
-}
-[data-darkmode="true"] .mt5700-logtab.active,
-[data-theme="dark"] .mt5700-logtab.active,
-.dark-theme .mt5700-logtab.active,
-body[data-darkmode="true"] .mt5700-logtab.active {
-  color: #fff !important;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+@media screen and (max-width: 768px) {
+
+    /* 日志面板及内部容器 */
+    .mt5700-logpanel,
+    .mt5700-logpanel .mt5700-loglist {
+        background-color: #111c2d !important;
+        color: #e5edf8 !important;
+        border-color: #344761 !important;
+        box-sizing: border-box !important;
+        max-width: 100% !important;
+    }
+
+    /* 日志行背景 */
+    .mt5700-logpanel .mt5700-loglist .mt5700-logrow,
+    .mt5700-logpanel .mt5700-loglist .mt5700-logrow:nth-child(even) {
+        background-color: #152237 !important;
+        color: #e5edf8 !important;
+        border-bottom: 1px solid #28384e !important;
+        box-sizing: border-box !important;
+    }
+
+    .mt5700-logpanel .mt5700-loglist .mt5700-logrow:nth-child(odd) {
+        background-color: #111c2d !important;
+    }
+
+    /* 日志正文 */
+    .mt5700-logpanel .mt5700-logrow .mt5700-logmsg {
+        color: #e5edf8 !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    /* 时间、分类及方向 */
+    .mt5700-logpanel .mt5700-logrow .mt5700-logtime {
+        color: #a9bfd9 !important;
+    }
+
+    .mt5700-logpanel .mt5700-logrow .mt5700-logcat,
+    .mt5700-logpanel .mt5700-logrow .mt5700-logdir {
+        color: #dce8f7 !important;
+    }
+
+    /* 日期分隔栏 */
+    .mt5700-logpanel .mt5700-logday {
+        background-color: #202c42 !important;
+        border-color: #405675 !important;
+    }
+
+    .mt5700-logpanel .mt5700-logday-text {
+        color: #d8c9ff !important;
+    }
+
+    /* 提示栏和底部统计 */
+    .mt5700-logpanel .mt5700-logpanel-hint,
+    .mt5700-logpanel .mt5700-logfooter {
+        background-color: #17243a !important;
+        color: #dbe7f5 !important;
+        border-color: #405675 !important;
+    }
+
+    .mt5700-logpanel .mt5700-logfooter-text {
+        color: #dbe7f5 !important;
+    }
+
+    /* 顶部视图切换按钮 */
+    .mt5700-logtabs {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        background-color: #17243a !important;
+        color: #e5edf8 !important;
+        box-sizing: border-box !important;
+        max-width: 100% !important;
+    }
+
+    .mt5700-logtab {
+        color: #dbe7f5 !important;
+        background-color: #182538 !important;
+        border-color: #354861 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 分类筛选按钮 */
+    .mt5700-logcatbar {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .mt5700-logcatbtn {
+        color: #dce8f7 !important;
+        background-color: #1b2b42 !important;
+        border-color: #405675 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .mt5700-logcatbtn.active {
+        color: #ffffff !important;
+        background-color: #493778 !important;
+        border-color: #8b5cf6 !important;
+    }
+
+    /* 搜索框及工具栏 */
+    .mt5700-logtoolbar {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .mt5700-logtoolbar input,
+    .mt5700-logtoolbar select {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 避免内容撑宽屏幕 */
+    .mt5700-logpanel,
+    .mt5700-loglist,
+    .mt5700-logrow {
+        min-width: 0 !important;
+    }
+
+    /* 底部按钮允许换行 */
+    .mt5700-logfooter-actions {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
 }
 
-/* 页面内部的分段标题/选项按钮：暗色下使用深底、浅字，选中态保留紫蓝强调色 */
-[data-darkmode="true"] .mt-tab-header,
-[data-theme="dark"] .mt-tab-header,
-.dark-theme .mt-tab-header,
-body[data-darkmode="true"] .mt-tab-header {
-  background: rgba(15, 23, 42, 0.82) !important;
-  border-color: rgba(148, 163, 184, 0.22) !important;
-}
-[data-darkmode="true"] .mt-tab-btn,
-[data-theme="dark"] .mt-tab-btn,
-.dark-theme .mt-tab-btn,
-body[data-darkmode="true"] .mt-tab-btn {
-  color: #cbd5e1 !important;
-}
-[data-darkmode="true"] .mt-tab-btn:hover,
-[data-theme="dark"] .mt-tab-btn:hover,
-.dark-theme .mt-tab-btn:hover,
-body[data-darkmode="true"] .mt-tab-btn:hover {
-  color: #c4b5fd !important;
-  background: rgba(139, 92, 246, 0.12) !important;
-}
-[data-darkmode="true"] .mt-tab-btn.active,
-[data-theme="dark"] .mt-tab-btn.active,
-.dark-theme .mt-tab-btn.active,
-body[data-darkmode="true"] .mt-tab-btn.active {
-  color: #e9d5ff !important;
-  background: rgba(79, 70, 229, 0.30) !important;
-  border-color: rgba(129, 140, 248, 0.38) !important;
+/* =========================================================
+   手机日志灰底最终覆盖修复
+   此规则已在你的 H69K 路由器上验证生效
+   ========================================================= */
+
+@media screen and (max-width: 768px) {
+
+    .mt5700-page .mt5700-logpanel,
+    .mt5700-page .mt5700-logpanel .mt5700-loglist {
+        background: #111c2d !important;
+        color: #e5edf8 !important;
+    }
+
+    .mt5700-page .mt5700-logpanel .mt5700-logrow,
+    .mt5700-page .mt5700-logpanel .mt5700-logrow:nth-child(odd),
+    .mt5700-page .mt5700-logpanel .mt5700-logrow:nth-child(even) {
+        background: #152237 !important;
+        color: #e5edf8 !important;
+        border-color: #344761 !important;
+    }
+
+    .mt5700-page .mt5700-logpanel .mt5700-logmsg,
+    .mt5700-page .mt5700-logpanel .mt5700-logmsg *,
+    .mt5700-page .mt5700-logpanel .mt5700-logpurpose {
+        color: #e5edf8 !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    .mt5700-page .mt5700-logpanel .mt5700-logtime {
+        color: #a9bfd9 !important;
+    }
+
+    .mt5700-page .mt5700-logpanel .mt5700-logday {
+        background: #202c42 !important;
+        border-color: #405675 !important;
+    }
+
+    .mt5700-page .mt5700-logpanel .mt5700-logday-text {
+        color: #d8c9ff !important;
+    }
+
+    .mt5700-page .mt5700-logpanel .mt5700-logpanel-hint,
+    .mt5700-page .mt5700-logpanel .mt5700-logfooter {
+        background: #17243a !important;
+        color: #dbe7f5 !important;
+    }
 }
 
-/* 手机端允许标题选项横向滑动，避免标题被挤压或裁切 */
-@media (max-width: 768px) {
-  .mt-tab-header {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .mt-tab-header::-webkit-scrollbar { display: none !important; }
-  .mt-tab-btn {
-    flex: 0 0 auto !important;
-    min-width: max-content !important;
-    padding: 9px 12px !important;
-  }
-  .mt5700-logtabs {
-    display: flex !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    flex-wrap: nowrap !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .mt5700-logtabs::-webkit-scrollbar { display: none !important; }
-  .mt5700-logtab {
-    flex: 0 0 auto !important;
-    min-width: max-content !important;
-    padding: 8px 12px !important;
-  }
-}
-
-
-/* v2.42.3 移除页面看板娘头像及空状态装饰人物，保留卡片数据和提示文字 */
-.mt-mascot-speech-wrap,
-.mt5700-page:not(.mt5700-sms-shell) .mt-mascot-avatar,
-.mt5700-page:not(.mt5700-sms-shell) .mt-mascot-img,
-.mt-anime-empty-stage {
-  display: none !important;
-}
-
-
-/* Hotfix: hide the mascot globally. Do not depend on .mt5700-page wrappers,
-   which are absent on some views/builds. Keep SMS conversation avatars intact. */
-.mt-mascot-speech-wrap,
-.mt-mascot-avatar,
-.mt-mascot-img,
-.mt-anime-empty-stage {
-  display: none !important;
-}
-
-/* Keep the four character background images visible. Only hide the floating mascot/avatar. */
+/* 手机端适配修复结束 */
