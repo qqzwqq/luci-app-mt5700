@@ -8040,8 +8040,4 @@ body[data-darkmode="true"] .mt-tab-btn.active {
   display: none !important;
 }
 
-/* Ensure the mascot's floating/background character layers are hidden too. */
-#mt5700-global-bg .mt-bg-char,
-.mt-bg-layer .mt-bg-char {
-  display: none !important;
-}
+/* Keep the four character background images visible. Only hide the floating mascot/avatar. */
