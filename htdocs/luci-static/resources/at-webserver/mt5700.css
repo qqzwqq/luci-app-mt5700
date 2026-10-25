@@ -8020,3 +8020,12 @@ body[data-darkmode="true"] .mt-tab-btn.active {
     padding: 8px 12px !important;
   }
 }
+
+
+/* v2.42.3 移除页面看板娘头像及空状态装饰人物，保留卡片数据和提示文字 */
+.mt-mascot-speech-wrap,
+.mt5700-page:not(.mt5700-sms-shell) .mt-mascot-avatar,
+.mt5700-page:not(.mt5700-sms-shell) .mt-mascot-img,
+.mt-anime-empty-stage {
+  display: none !important;
+}
