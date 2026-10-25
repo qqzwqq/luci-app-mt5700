@@ -8029,3 +8029,19 @@ body[data-darkmode="true"] .mt-tab-btn.active {
 .mt-anime-empty-stage {
   display: none !important;
 }
+
+
+/* Hotfix: hide the mascot globally. Do not depend on .mt5700-page wrappers,
+   which are absent on some views/builds. Keep SMS conversation avatars intact. */
+.mt-mascot-speech-wrap,
+.mt-mascot-avatar,
+.mt-mascot-img,
+.mt-anime-empty-stage {
+  display: none !important;
+}
+
+/* Ensure the mascot's floating/background character layers are hidden too. */
+#mt5700-global-bg .mt-bg-char,
+.mt-bg-layer .mt-bg-char {
+  display: none !important;
+}
