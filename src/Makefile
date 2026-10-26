@@ -99,5 +99,5 @@ install: compile
 	chmod 0755 "$(DESTDIR)/usr/bin/at-webserver-rust"
 
 clean:
-	cd $(RUST_DIR) && cargo clean 2>/dev/null || true
-	rm -rf "$(CARGO_TARGET_DIR)"
+	cd "$(RUST_DIR)" && cargo clean 2>/dev/null || true
+	rm -rf "$(CURDIR)/target/apk" "$(CURDIR)/target/opkg"
