@@ -81,12 +81,13 @@ BIN := $(CARGO_TARGET_DIR)/$(RUST_TARGET)/release/at-webserver
 
 all: compile
 
+
 compile:
 	@echo "==> [mt5700] cargo build: ARCH=$(ARCH) ARCH_PACKAGES=$(ARCH_PACKAGES) RUST_TARGET=$(RUST_TARGET)"
-cd $(RUST_DIR) && \
-	CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" \
-	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER="$(TARGET_CC)" \
-	cargo build $(CARGO_BUILD_STD_FLAGS) --release --target $(RUST_TARGET)
+	cd "$(RUST_DIR)" && \
+		CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" \
+		CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER="$(TARGET_CC)" \
+		cargo build $(CARGO_BUILD_STD_FLAGS) --release --target "$(RUST_TARGET)"
 	test -x "$(BIN)" || { echo "ERROR: cargo 未产出 $(BIN)"; exit 1; }
 	@echo "==> [mt5700] 后端二进制就绪: $(BIN)"
 
