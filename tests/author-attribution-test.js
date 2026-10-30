@@ -2,12 +2,12 @@
 /**
  * 作者署名回归检查（服务配置页 admin/modem/5g/config）
  *
- * 保护对象：页面底部「作者：LianXia233」署名及其指向主仓库的链接。
+ * 保护对象：页面底部「作者：我是挖洋镐的」署名及其指向维护者仓库的链接。
  * 见仓库根目录 AGENTS.md「作者署名保护规则」。
  *
  * 覆盖：
  *   1) 视图 service.js 存在署名 DOM，且追加在底部操作栏之后；
- *   2) 链接地址指向主仓库，带 target="_blank" 与 rel="noopener noreferrer"；
+ *   2) 链接地址指向维护者仓库，带 target="_blank" 与 rel="noopener noreferrer"；
  *   3) 署名样式类存在于 mt5700.css（低对比、移动端断点、键盘焦点）；
  *   4) 署名未被扩散到其他视图页面（仅限本页）；
  *   5) 维护规则已写入 AGENTS.md；
@@ -27,7 +27,7 @@ const SERVICE_VIEW = path.join(viewDir, 'service.js');
 const CSS = path.join(libDir, 'mt5700.css');
 const AGENTS = path.join(root, 'AGENTS.md');
 
-const AUTHOR_URL = 'https://github.com/LianXia233/luci-app-mt5700';
+const AUTHOR_URL = 'https://github.com/qqzwqq/luci-app-mt5700';
 
 const results = [];
 function check(name, ok) {
@@ -50,7 +50,7 @@ check('service.js: 存在 .mt5700-author 容器', authorIdx > 0);
 check('service.js: 署名容器在底部操作栏之后', authorIdx > actionsIdx && actionsIdx > 0);
 check('service.js: 署名容器在 render 返回之前', authorIdx < returnIdx);
 check('service.js: 包含「作者：」文案', view.indexOf("'作者：'") > 0);
-check('service.js: 包含署名文本 LianXia233', view.indexOf("}, 'LianXia233')") > 0);
+check('service.js: 包含署名文本 我是挖洋镐的', view.indexOf("}, '我是挖洋镐的')") > 0);
 check('service.js: 链接指向主仓库', view.indexOf("'href': '" + AUTHOR_URL + "'") > 0);
 check('service.js: 外链使用 _blank', view.indexOf("'target': '_blank'") > 0);
 check('service.js: 外链带 noopener noreferrer', view.indexOf("'rel': 'noopener noreferrer'") > 0);
