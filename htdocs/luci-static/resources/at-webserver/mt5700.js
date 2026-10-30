@@ -346,21 +346,6 @@ var Mt5700 = (function () {
 	 * 看板娘：保留头像本体（图片 + 悬浮动效），对话气泡功能已移除。
 	 * 之前的气泡会挤占英雄栏标题并在窄屏下遮挡内容，按需求不再提供。
 	 */
-	api.mascot = function () {
-		var wrap = E('div', { 'class': 'mt-mascot-speech-wrap' });
-
-		// 二次元蓝发猫耳看板娘头像图片，外圈带光环与悬浮动效
-		var avatar = E('div', { 'class': 'mt-mascot-avatar' });
-		var img = E('img', {
-			'class': 'mt-mascot-img',
-			'src': '/luci-static/resources/at-webserver/mascot.png?v=' + MT5700_CSS_VERSION,
-			'alt': '可可的看板娘'
-		});
-		avatar.appendChild(img);
-		wrap.appendChild(avatar);
-
-		return { el: wrap };
-	};
 
 	/* ================= 四格动态信号图标 (cellular signal) =================
 	 *
@@ -462,13 +447,8 @@ var Mt5700 = (function () {
 		}
 		hero.appendChild(content);
 
-		var art = E('div', { 'class': 'mt5700-hero-art' });
-
-		/* 看板娘头像（图片 + 悬浮动效）；对话气泡已按需求移除，见 api.mascot 注释 */
-		var mascot = api.mascot();
-		art.appendChild(mascot.el);
-		hero.appendChild(art);
-
+        // 不创建看板娘区域，保留首页标题、描述和其他功能
+		
 		node.appendChild(hero);
 
 		var body = E('div', { 'class': 'mt5700-page-body' });
