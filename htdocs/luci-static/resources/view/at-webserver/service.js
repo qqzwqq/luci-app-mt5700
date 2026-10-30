@@ -1357,7 +1357,7 @@ return L.view.extend({
 			E('span', { 'class': 'mt5700-author-label' }, '作者：'),
 			E('a', {
 				'class': 'mt5700-author-link',
-				'href': 'https://github.com/qqzwqq/luci-app-mt5700',
+				'href': 'https://github.com/LianXia233/luci-app-mt5700',
 				'target': '_blank',
 				'rel': 'noopener noreferrer'
 			}, '我是挖洋镐的')
