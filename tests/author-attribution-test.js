@@ -96,7 +96,7 @@ const agents = read(AGENTS);
 check('AGENTS.md: 存在作者署名保护规则章节', agents.indexOf('作者署名保护规则') > 0);
 check('AGENTS.md: 明确指定 admin/modem/5g/config', agents.indexOf('admin/modem/5g/config') > 0);
 check('AGENTS.md: 明确要求保留署名与链接',
-	agents.indexOf('都必须保留该署名及其链接') > 0);
+	agents.indexOf('都必须保留当前署名及其链接') > 0);
 check('AGENTS.md: 明确维护者授权前提',
 	agents.indexOf('除非项目维护者明确授权') > 0);
 check('AGENTS.md: 记录署名实现位置', agents.indexOf('service.js') > 0 && agents.indexOf(AUTHOR_URL) > 0);
