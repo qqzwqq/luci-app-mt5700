@@ -1360,7 +1360,7 @@ return L.view.extend({
 				'href': 'https://github.com/LianXia233/luci-app-mt5700',
 				'target': '_blank',
 				'rel': 'noopener noreferrer'
-			}, '我是挖洋镐的')
+			}, 'LianXia233')
 		]));
 
 		// 任何表单控件变更都标记为「未保存」，与 CBI 表单行为对齐
