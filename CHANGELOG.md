@@ -8,6 +8,69 @@
 
 ---
 
+## v1.32.10（2026-11-14）
+
+> 承接 v1.32.9 之后 main 上的权限门禁加固与素材授权文档修正。本版只涉及 CI 门禁、
+> 测试脚本、文档与一个测试脚本的执行位，不改运行时脚本、渲染结果与用户可见行为。
+
+- **test(ci)** 修复权限门禁的 BOM 假阴性：`isValidShebang` 不再 trim 首行，显式拒绝
+  UTF-8 BOM 与前导空白（内核只认文件头两字节 `#!`，BOM+LF 会让 procd 直接
+  execve 返回 ENOEXEC），保留 `#! /bin/sh` 解释器前空格；`static-check` 第 3 项
+  强化为「LF 且无 UTF-8 BOM」，覆盖全部 353 个文本文件；诊断改用 JSON.stringify
+  输出原始首行。
+- **test(ci)** 权限清单与仓库真实可执行面对齐：补齐 `tests/mock-modem/` 下 4 个
+  100755 入口与恢复执行位的 `run-sim.sh`，共 12 项；新增 `EXEC_ONLY_DIRS`
+  反向断言，`init.d` / `uci-defaults` / `hotplug.d` / `libexec` 内每个 git blob
+  都必须登记，新增同类脚本忘记登记会直接失败；`static-check` 第 5 项同步纳入
+  登记完整性，检查项仍为五项。
+- **test(ci)** 拆分「必须 100755」与「必须 /bin/sh|bash」两份清单：`NON_SHELL_EXECUTABLES`
+  标出两个 `#!/usr/bin/env node` 入口，`SHELL_SCRIPTS` 由主清单派生，非 shell
+  可执行文件不再被 shebang 断言误判。
+- **fix(test)** `git ls-files` 改用 `-z` 与 `--` 分隔符，NUL 分隔不再受
+  `core.quotePath` octal 转义影响（中文路径不再误报未跟踪），去掉整行 trim、
+  只认 stage 0 条目；读不到 git 索引时改为 `console.warn` 说明降级范围，
+  Windows 无 git 不再静默显示 PASS。
+- **fix(perms)** 恢复 `tests/mock-modem/run-sim.sh` 与
+  `root/usr/libexec/at-webserver/on-uplink.sh` 的 100755 执行位。
+- **docs(ci)** 修正 `checks.yml` 中 Shebang 校验归属与 BOM 口径，明确
+  `tests/lib/` 辅助模块与 `tests/mock-modem/uci` 符号链接不纳入清单。
+- **docs(assets)** 更正角色背景图权属表述并补齐 PC / 移动端素材清单，
+  未取得书面授权的风险继续明确标记。
+- **chore(release)** 版本号 1.32.9 → 1.32.10，按 AGENTS.md「发版版本一致性」
+  同步 `Makefile`、`compat.js`、`Cargo.toml`、`Cargo.lock`、README 徽标、
+  文档下载入口、`tests/usage-source-test.js` 基线断言，并新增本版发布说明。
+- **note(license)** 原 `## Unreleased` 中登记的 cargo-deny 许可证门禁与
+  `CDLA-Permissive-2.0` 协议文本已随 v1.32.9 发布（见该版发布说明），
+  本版不再重复计入。
+
+## v1.32.9（2026-11-12）
+
+### feat(ui) 服务配置页页脚改为版权署名与 SPDX 许可证标识
+
+> 页脚文案由「作者：LianXia233」调整为「© 2026 LianXia233 · 开发与维护」，
+> 并追加纯文本 `GPL-3.0-only` 标识；链接仍指向 GitHub 主仓库。
+
+- **feat(ui)** `view/at-webserver/service.js` 的 `.mt5700-author` 容器内为
+  1 个主链接 + 1 个许可证 span，沿用 `target="_blank"` + `rel="noopener noreferrer"`；
+  许可证节点复用容器排版、未新增 CSS 规则，故不递增 `MT5700_CSS_VERSION`。
+- **test** `tests/author-attribution-test.js` 断言由 29 项扩到 50 项：文案 / SPDX
+  由常量驱动，新增 © 写法、许可证节点结构、历史文案防回退（按完整字符串字面量
+  比对，避免「© 2026 …」包含旧文案子串时误判）、窄屏换行与 gap、四处文案与 SPDX
+  一致性、`checks.yml` LF 等检查。
+- **docs(agents)** AGENTS.md 补 SPDX 声明、署名实现位置表、「署名文案变更联动清单」
+  与「更新日志豁免」条款；`.github/workflows/checks.yml` 的检查项说明与约定同步。
+
+### ci(release) 每次编译只保留最新一个产物
+
+- **ci(release)** 删除 `keep_releases` / `keep_previews` 两个派发输入，清理策略固定为
+  「每次发布成功后，v* 与 preview-* 两组各自只保留组内最新一个，其余 Release 与
+  资产一律删除」；不再受保留数、latest 标记或创建顺序影响。
+- **ci(release)** 预览通道发布前仍清空全部历史 preview-* Release 与对应 git tag；
+  两条通道互不挤出，`debian-v*` 另一条发布线与全部 git tag 不参与清理。
+- **chore(release)** 版本号 1.32.8 → 1.32.9，按 AGENTS.md「发版版本一致性」同步
+  `Makefile`、`compat.js`、`Cargo.toml`、`Cargo.lock`、README 徽标、文档下载入口、
+  `tests/usage-source-test.js` 基线断言，并新增本版发布说明。
+
 ## v1.32.8（2026-11-08）
 
 ### feat(rust) 后端自报版本改为构建期注入，与 PKG_VERSION 单一来源
