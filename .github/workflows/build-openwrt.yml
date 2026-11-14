@@ -815,58 +815,38 @@ jobs:
       # 结果：正式版发布后 v* 组只剩本次一个；预览版发布后正式版组仍保留
       #       最新一个稳定版，预览组只剩本次一个 —— 两组互不挤出。
 
-      - name: 清理旧产物（按设置保留正式版和预览版）
+
+      - name: 清理旧产物（正式版和预览版各保留最新一个）
         if: success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          KEEP_RELEASES: ${{ github.event.inputs.keep_releases || '1' }}
-          KEEP_PREVIEWS: ${{ github.event.inputs.keep_previews || '1' }}
         run: |
           set -e
 
-          case "${KEEP_RELEASES}" in
-            ''|*[!0-9]*) KEEP_RELEASES=1 ;;
-            *) [ "${KEEP_RELEASES}" -ge 1 ] || KEEP_RELEASES=1 ;;
-          esac
-
-          case "${KEEP_PREVIEWS}" in
-            ''|*[!0-9]*) KEEP_PREVIEWS=1 ;;
-            *) [ "${KEEP_PREVIEWS}" -ge 1 ] || KEEP_PREVIEWS=1 ;;
-          esac
-
-          echo "==> Retention: releases=${KEEP_RELEASES}, previews=${KEEP_PREVIEWS}"
-
           cleanup_group() {
             local regex="$1"
-            local keep="$2"
-            local label="$3"
+            local label="$2"
 
+            # 按创建时间倒序排列，不读取 isLatest，
+            # 避免 latest 标记导致额外保留 Release。
             mapfile -t ROWS < <(
-              gh release list --repo "${GITHUB_REPOSITORY}" --limit 100 \
-                --json tagName,isLatest,createdAt \
+              gh release list --repo "${GITHUB_REPOSITORY}" --limit 1000 \
+                --json tagName,createdAt \
                 --jq "map(select(.tagName | test(\"${regex}\")))
                       | sort_by(.createdAt) | reverse
-                      | .[] | \"\(.tagName)\t\(.isLatest)\""
+                      | .[].tagName"
             )
 
-            echo "==> ${label}: found ${#ROWS[@]}, keeping ${keep}"
+            echo "==> ${label}: found ${#ROWS[@]}, keeping newest 1"
 
             local idx=0
             local tag
-            local is_latest
 
-            for row in "${ROWS[@]}"; do
+            for tag in "${ROWS[@]}"; do
               idx=$((idx + 1))
-              tag="${row%%$'\t'*}"
-              is_latest="${row##*$'\t'}"
 
-              if [ "$idx" -le "$keep" ]; then
+              if [ "$idx" -eq 1 ]; then
                 echo "  [KEEP] ${tag}"
-                continue
-              fi
-
-              if [ "$is_latest" = "true" ]; then
-                echo "  [KEEP] ${tag} (GitHub latest)"
                 continue
               fi
 
@@ -877,7 +857,7 @@ jobs:
             done
           }
 
-          cleanup_group '^v[0-9]' "$KEEP_RELEASES" 'Formal releases'
-          cleanup_group '^preview-' "$KEEP_PREVIEWS" 'Preview releases'
+          cleanup_group '^v[0-9]' 'Formal releases'
+          cleanup_group '^preview-' 'Preview releases'
 
           echo "==> Release cleanup completed"
