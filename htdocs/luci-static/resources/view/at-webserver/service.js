@@ -262,7 +262,9 @@ return L.view.extend({
 		body.appendChild(bottomActions);
 
 		/* ---------- 作者署名（页脚） ----------
+		 * Project author attribution: preserve unless explicitly authorized.
 		 * 保留 fork 维护者署名与仓库链接，许可证标识保持不变。
+		 * 不得在未获维护者明确授权时移除署名、仓库链接或许可证标识。
 		 */
 		body.appendChild(E('div', { 'class': 'mt5700-author' }, [
 			E('a', {
