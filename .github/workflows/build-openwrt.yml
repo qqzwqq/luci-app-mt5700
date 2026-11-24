@@ -760,6 +760,16 @@ jobs:
             cat "$NOTES"
           fi
 
+      - name: 生成 SHA256SUMS
+        run: |
+          set -euo pipefail
+          cd dist
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%P\\n' | LC_ALL=C sort | while IFS= read -r file; do
+            sha256sum "$file"
+          done > SHA256SUMS
+          test -s SHA256SUMS
+          echo "==> SHA256SUMS 已生成，覆盖 $(wc -l < SHA256SUMS) 个发布文件"
+
       - name: 发布 GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
