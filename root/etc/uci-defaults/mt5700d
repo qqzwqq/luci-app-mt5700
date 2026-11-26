@@ -14,7 +14,10 @@
 # 删除步骤（下个大版本可连同本调用一并删除）。
 # ---------------------------------------------------------------------------
 if [ -x /usr/libexec/mt5700d/migrate-legacy.sh ]; then
-	/usr/libexec/mt5700d/migrate-legacy.sh
+	if ! /usr/libexec/mt5700d/migrate-legacy.sh; then
+		logger -t mt5700d "错误：开机阶段旧版本数据迁移未完成，保留 uci-defaults 脚本供下次重试；新版服务暂不启用"
+		exit 1
+	fi
 fi
 
 # 首次安装时确保默认配置存在（config 文件已随包分发，这里做防御性初始化）
