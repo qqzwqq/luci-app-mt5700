@@ -65,7 +65,10 @@ define Package/luci-app-mt5700/preinst
 			logger -t mt5700d "UCI 新旧配置并存，已保留 mt5700d 并备份旧配置" 2>/dev/null || true
 		else
 			mkdir -p /etc/mt5700d-migrate
-			cp -f /etc/config/at-webserver /etc/mt5700d-migrate/legacy-config
+			if ! cp -f /etc/config/at-webserver /etc/mt5700d-migrate/legacy-config; then
+				logger -t mt5700d "错误：无法在解包前备份旧 UCI 配置，中止升级以保护配置" 2>/dev/null || true
+				exit 1
+			fi
 			logger -t mt5700d "已在解包前保存旧 UCI 配置" 2>/dev/null || true
 		fi
 	fi
@@ -104,7 +107,12 @@ define Package/luci-app-mt5700/postinst
 	# /etc/config/mt5700d 并替换旧路径，再处理短信归档、用量、防火墙规则与
 	# 旧进程清理。脚本头的注释写了完整删除步骤。
 	# ---------------------------------------------------------------------
-	[ -x /usr/libexec/mt5700d/migrate-legacy.sh ] && /usr/libexec/mt5700d/migrate-legacy.sh
+	if [ -x /usr/libexec/mt5700d/migrate-legacy.sh ]; then
+		if ! /usr/libexec/mt5700d/migrate-legacy.sh; then
+			logger -t mt5700d "错误：旧版本数据迁移失败，停止新版服务安装流程；请检查迁移日志后手动恢复" 2>/dev/null || true
+			exit 1
+		fi
+	fi
 
 	# ---------------------------------------------------------------------
 	# 合并 apk/opkg 因「受保护路径」留下的 .apk-new
