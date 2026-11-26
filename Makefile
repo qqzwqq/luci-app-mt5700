@@ -60,8 +60,15 @@ define Package/luci-app-mt5700/preinst
 	if [ -f /etc/config/at-webserver ]; then
 		if [ -f /etc/config/mt5700d ]; then
 			# 异常升级态：两份并存时保留较新的目标，旧文件留档供人工恢复。
-			cp -f /etc/config/mt5700d /etc/config/mt5700d.pre-migration 2>/dev/null || true
-			mv -f /etc/config/at-webserver /etc/config/at-webserver.pre-migration 2>/dev/null || true
+			# 两份备份任一步失败都中止升级，不能静默丢掉唯一的旧配置副本。
+			if ! cp -f /etc/config/mt5700d /etc/config/mt5700d.pre-migration 2>/dev/null; then
+				logger -t mt5700d "错误：无法备份现有 mt5700d 配置，中止升级" 2>/dev/null || true
+				exit 1
+			fi
+			if ! mv -f /etc/config/at-webserver /etc/config/at-webserver.pre-migration 2>/dev/null; then
+				logger -t mt5700d "错误：无法留存旧 at-webserver 配置，中止升级" 2>/dev/null || true
+				exit 1
+			fi
 			logger -t mt5700d "UCI 新旧配置并存，已保留 mt5700d 并备份旧配置" 2>/dev/null || true
 		else
 			mkdir -p /etc/mt5700d-migrate
