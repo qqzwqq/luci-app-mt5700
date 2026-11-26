@@ -267,10 +267,10 @@ return L.view.extend({
 		body.appendChild(E('div', { 'class': 'mt5700-author' }, [
 			E('a', {
 				'class': 'mt5700-author-link',
-				'href': 'https://github.com/LianXia233/luci-app-mt5700',
+				'href': 'https://github.com/qqzwqq/luci-app-mt5700',
 				'target': '_blank',
 				'rel': 'noopener noreferrer'
-			}, '© 2026 LianXia233 · 开发与维护'),
+			}, '© 2026 我是挖洋镐的 · 开发与维护'),
 			E('span', {
 				'class': 'mt5700-author-license',
 				'title': 'GNU General Public License v3.0 only'
