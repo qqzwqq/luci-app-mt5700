@@ -27,8 +27,9 @@
 #   3) 调用点各留一行，主流程保持可读。
 #
 # 幂等：每个动作都先判断来源存在且目标不存在，重复执行安全。
-# 尽力而为：任何单步失败都不阻断调用方（安装/开机的其余步骤更重要），
-# 失败原因写 logger 供排查。
+# 数据安全优先：配置、短信归档、流量记录迁移失败，以及旧串口进程无法退出，
+# 都必须返回非零；调用方应停止启动新版服务并保留脚本供下次重试。
+# 非关键清理（例如旧目录已不存在）允许跳过，失败原因写 logger 供排查。
 # ============================================================================
 
 set -u
@@ -82,14 +83,20 @@ fi
 # 只搬目录、不改内容：读端同时认新旧两种容器魔数，旧归档搬过去即可正常浏览；
 # 写入始终使用新魔数，旧文件在下次归档时自然被新格式覆盖。
 if [ -d /etc/at-webserver/SMS ] && [ ! -d /etc/mt5700d/SMS ]; then
-	mkdir -p /etc/mt5700d
-	mv -f /etc/at-webserver/SMS /etc/mt5700d/SMS
-	log "已迁移旧短信归档到 /etc/mt5700d/SMS（旧格式仍可读取）"
+	if mkdir -p /etc/mt5700d && mv /etc/at-webserver/SMS /etc/mt5700d/SMS; then
+		log "已迁移旧短信归档到 /etc/mt5700d/SMS（旧格式仍可读取）"
+	else
+		log "错误：短信归档迁移失败，原始目录已保留；停止新版服务安装流程"
+		exit 1
+	fi
 fi
 
 # --- 3. 月用量持久化 ---------------------------------------------------------
 if [ -f /etc/at-webserver-usage.json ] && [ ! -f /etc/mt5700d-usage.json ]; then
-	mv -f /etc/at-webserver-usage.json /etc/mt5700d-usage.json
+	if ! mv /etc/at-webserver-usage.json /etc/mt5700d-usage.json; then
+		log "错误：流量记录迁移失败，原始文件已保留；停止新版服务安装流程"
+		exit 1
+	fi
 fi
 
 rmdir /etc/at-webserver 2>/dev/null
@@ -102,7 +109,10 @@ for rule_name in at_webserver_wan_block at_webserver_wan_allow; do
 	rule_idx=$(uci show firewall 2>/dev/null | grep "\.name='$rule_name'" | cut -d'[' -f2 | cut -d']' -f1 | head -n1)
 	[ -n "$rule_idx" ] && uci delete firewall.@rule[$rule_idx] 2>/dev/null
 done
-uci commit firewall 2>/dev/null
+if ! uci commit firewall 2>/dev/null; then
+	log "错误：旧防火墙规则清理未能提交，停止新版服务安装流程"
+	exit 1
+fi
 
 # --- 5. 旧进程与旧文件 -------------------------------------------------------
 # 旧二进制必须删：它独占同一路 PCUI 串口，与 mt5700d 同时运行会互相抢锁，
@@ -117,6 +127,10 @@ fi
 [ -x /etc/init.d/at-webserver ] && /etc/init.d/at-webserver stop >/dev/null 2>&1
 killall -q at-webserver-rust 2>/dev/null || true
 sleep 1
+if pidof at-webserver-rust >/dev/null 2>&1; then
+	log "错误：旧版 at-webserver-rust 仍在运行并可能占用 PCUI 串口；停止新版服务安装流程"
+	exit 1
+fi
 rm -f /usr/bin/at-webserver-rust
 rm -f /etc/init.d/at-webserver
 rm -f /etc/rc.d/S99at-webserver /etc/rc.d/K10at-webserver
