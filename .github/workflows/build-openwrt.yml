@@ -509,9 +509,19 @@ jobs:
                 opkg install ./<arch>-luci-app-mt5700_*.ipk \
                              ./<arch>-luci-i18n-mt5700-zh-cn_*.ipk
 
-            只需要英文界面时可以只装主包，此时不要再单独装语言包。
+            语言包仅为简体中文；只需要中文界面时主包与语言包一起装即可。
+            主包不依赖语言包，单独安装也能跑，只是界面文案沿用源码中文。
 
-          五、安装前可先做零风险预演
+          五、校验下载完整性
+
+            每个 Release 都附带 SHA256SUMS。下载主包/语言包与 SHA256SUMS 后：
+
+                grep -E 'luci-app-mt5700|luci-i18n' SHA256SUMS | sha256sum -c -
+
+            全部显示 OK 再安装。安装包未由 OpenWrt 官方密钥签名，
+            apk/opkg 的 --allow-untrusted 只跳过签名校验，不校验内容哈希。
+
+          六、安装前可先做零风险预演
 
             用 apk --simulate 走完整架构与依赖求解，但不真正安装：
 
@@ -523,6 +533,20 @@ jobs:
           # 去掉 heredoc 缩进，保持文本左对齐
           sed -i 's/^          //' dist/ARCH-GUIDE.txt
           cat dist/ARCH-GUIDE.txt
+
+      - name: 生成 SHA256SUMS
+        # 安装包未由 OpenWrt 官方密钥签名，用户只能靠哈希核对下载完整性。
+        # 必须在 ARCH-GUIDE 生成之后执行，保证校验和覆盖全部发布资产。
+        run: |
+          set -e
+          (
+            cd dist
+            find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\n' \
+              | LC_ALL=C sort \
+              | xargs -r sha256sum > SHA256SUMS
+          )
+          echo "==> SHA256SUMS："
+          cat dist/SHA256SUMS
 
       - name: 发布完整性校验（6 组合主包 + 架构覆盖）
         run: |
@@ -760,16 +784,6 @@ jobs:
             cat "$NOTES"
           fi
 
-      - name: 生成 SHA256SUMS
-        run: |
-          set -euo pipefail
-          cd dist
-          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%P\n' | LC_ALL=C sort | while IFS= read -r file; do
-            sha256sum "$file"
-          done > SHA256SUMS
-          test -s SHA256SUMS
-          echo "==> SHA256SUMS 已生成，覆盖 $(wc -l < SHA256SUMS) 个发布文件"
-
       - name: 发布 GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -788,7 +802,7 @@ jobs:
           # checkout preview-<sha> 拿到的就不是被构建的那份代码。正式版通道传的是
           # 已存在的 tag，gh 会忽略该参数，因此统一加没有副作用。
           FLAGS=(--repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}")
-          TITLE="AT WebServer ${TAG}"
+          TITLE="mt5700d ${TAG}"
           if [ "$PRERELEASE" = "true" ]; then
             FLAGS+=(--prerelease)
             # 标题承担「版本号」职责：tag 本身只是提交短 SHA，不含 PKG_VERSION，
@@ -824,50 +838,42 @@ jobs:
       #      不匹配上述两组正则，不参与清理；所有 git tag 中仅旧 preview-* 会被清。
       # 结果：正式版发布后 v* 组只剩本次一个；预览版发布后正式版组仍保留
       #       最新一个稳定版，预览组只剩本次一个 —— 两组互不挤出。
-
-
-      - name: 清理旧产物（正式版和预览版各保留最新一个）
+      - name: 清理旧产物（每次编译只保留最新一个）
         if: success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.ver.outputs.tag }}
         run: |
           set -e
-
-          cleanup_group() {
-            local regex="$1"
-            local label="$2"
-
-            # 按创建时间倒序排列，不读取 isLatest，
-            # 避免 latest 标记导致额外保留 Release。
-            mapfile -t ROWS < <(
-              gh release list --repo "${GITHUB_REPOSITORY}" --limit 1000 \
-                --json tagName,createdAt \
-                --jq "map(select(.tagName | test(\"${regex}\")))
-                      | sort_by(.createdAt) | reverse
-                      | .[].tagName"
-            )
-
-            echo "==> ${label}: found ${#ROWS[@]}, keeping newest 1"
-
-            local idx=0
-            local tag
-
-            for tag in "${ROWS[@]}"; do
-              idx=$((idx + 1))
-
-              if [ "$idx" -eq 1 ]; then
-                echo "  [KEEP] ${tag}"
+          purge_group() {
+            local regex="$1" label="$2"
+            mapfile -t TAGS < <(gh release list --repo "${GITHUB_REPOSITORY}" --limit 100 \
+              --json tagName,createdAt \
+              --jq "map(select(.tagName | test(\"${regex}\"))) | sort_by(.createdAt) | reverse | .[].tagName")
+            if [ "${#TAGS[@]}" -eq 0 ]; then
+              echo "==> ${label}: 无 Release，跳过"
+              return 0
+            fi
+            # 本次 tag 属于该组 → 保留它；否则保留组内创建时间最新的一个
+            local keep=""
+            case "${TAG}" in
+              v[0-9]*) if [ "${regex}" = '^v[0-9]' ]; then keep="${TAG}"; fi ;;
+              preview-*) if [ "${regex}" = '^preview-' ]; then keep="${TAG}"; fi ;;
+            esac
+            if [ -z "${keep}" ]; then keep="${TAGS[0]}"; fi
+            echo "==> ${label}: 共 ${#TAGS[@]} 个，只保留 ${keep}"
+            for t in "${TAGS[@]}"; do
+              if [ "${t}" = "${keep}" ]; then
+                echo "  [保留] ${t}"
                 continue
               fi
-
-              echo "  [DELETE] ${tag}"
-
-              gh release delete "$tag" --yes --repo "${GITHUB_REPOSITORY}" \
-                || echo "::warning::Failed to delete ${tag}; continuing"
+              echo "  [删除] ${t}"
+              local flags=(--yes --repo "${GITHUB_REPOSITORY}")
+              if [ "${regex}" = '^preview-' ]; then flags+=(--cleanup-tag); fi
+              gh release delete "${t}" "${flags[@]}" \
+                || echo "::warning::删除 ${t} 失败（不影响本次发布）"
             done
           }
-
-          cleanup_group '^v[0-9]' 'Formal releases'
-          cleanup_group '^preview-' 'Preview releases'
-
-          echo "==> Release cleanup completed"
+          purge_group '^v[0-9]' '正式版 v* Release'
+          purge_group '^preview-' '预览版 preview-* Release'
+          echo "==> 清理完成：编译产物只保留最新一个"

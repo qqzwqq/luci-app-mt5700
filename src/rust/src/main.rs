@@ -1,7 +1,7 @@
 // Copyright (C) 2026 LianXia233
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! at-webserver —— MT5700M 5G 模组 AT 服务（Rust 实现）。
+//! mt5700d —— MT5700M 5G 模组 AT 服务（Rust 实现）。
 //!
 //! 完整业务逻辑迁移：
 //! - AT 客户端（网络/串口/自动探测）
@@ -66,7 +66,7 @@ const VERSION: &str = match option_env!("MT5700_VERSION") {
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.iter().any(|a| a == "-version" || a == "--version") {
-        println!("at-webserver {} (rustc {})", VERSION, rustc_version());
+        println!("mt5700d {} (rustc {})", VERSION, rustc_version());
         return;
     }
     let verbose = args.iter().any(|a| a == "-verbose" || a == "--verbose");
@@ -87,7 +87,7 @@ fn rustc_version() -> &'static str {
 }
 
 async fn run(verbose: bool) -> Result<(), String> {
-    log_info!("at-webserver {} 启动中 (pid {})", VERSION, std::process::id());
+    log_info!("mt5700d {} 启动中 (pid {})", VERSION, std::process::id());
     // 时间源必须最早初始化：它会按系统时区设置（/etc/TZ → uci）确定本地偏移，
     // 并写回 TZ 环境变量，供后续 libc / 子进程一致使用。
     // 必须在任何会读时间/落日志的业务任务之前调用，故放在这里、而非各任务内部懒加载
@@ -187,7 +187,7 @@ async fn run(verbose: bool) -> Result<(), String> {
     let hub = rpc.hub();
     let broadcaster: Broadcaster = Arc::new(move |v: serde_json::Value| hub.broadcast(&v));
 
-    log_info!(Cat::Rpc, "启动完成，LuCI RPC 127.0.0.1:{}（经 rpcd/ucode 代理，不对外暴露）", cfg.websocket.port);
+    log_info!(Cat::Rpc, "启动完成，LuCI RPC {}:{}（经 rpcd/ucode 代理）", cfg.websocket.bind, cfg.websocket.port);
     if !verbose {
         // 稳态只留警告和错误，避免刷满 procd 日志。
         crate::logger::set_level(crate::logger::Level::Warn);

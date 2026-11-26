@@ -1,7 +1,7 @@
 // Copyright (C) 2026 LianXia233
 // SPDX-License-Identifier: GPL-3.0-only
 
-//! UCI 配置读取：一次 `uci show at-webserver` 取回整个配置段。
+//! UCI 配置读取：一次 `uci show mt5700d` 取回整个配置段。
 //! 键名与 LuCI 页面约定完全一致。
 
 use crate::{log_info, log_warn};
@@ -483,6 +483,8 @@ pub struct QqNotifyConfig {
 pub struct WebSocketConfig {
     pub port: u16,
     pub auth_key: String,
+    /// 兼容旧键名：1 时监听 0.0.0.0，并由 init.d 追加一条 **src=lan** 的放行规则。
+    /// 它不会自动放行 WAN；WAN 访问仍需用户显式配置防火墙。对外监听务必设置 auth_key。
     pub allow_wan: bool,
     /// RPC 监听地址：websocket_bind 显式值优先；否则 allow_wan=1 → 0.0.0.0，默认 127.0.0.1
     pub bind: String,
@@ -732,13 +734,13 @@ fn env_nonempty(key: &str) -> String {
     std::env::var(key).unwrap_or_default().trim().to_string()
 }
 
-/// 用一次 `uci show at-webserver` 取回整个配置段。
+/// 用一次 `uci show mt5700d` 取回整个配置段。
 pub async fn uci_values() -> Result<UciReader, String> {
     // 加 5s 超时，避免 uci 命令异常挂起卡死启动。
     let out = tokio::time::timeout(
         Duration::from_secs(5),
         tokio::process::Command::new("uci")
-            .args(["show", "at-webserver"])
+            .args(["show", "mt5700d"])
             .output(),
     )
     .await
@@ -748,7 +750,7 @@ pub async fn uci_values() -> Result<UciReader, String> {
         return Err(format!("uci show 退出码 {}", out.status));
     }
     let text = String::from_utf8_lossy(&out.stdout);
-    let prefix = "at-webserver.config.";
+    let prefix = "mt5700d.config.";
     let mut values = HashMap::new();
     for line in text.lines() {
         let line = line.trim();
@@ -1178,8 +1180,8 @@ mod tests {
 
     #[test]
     fn notify_timer_interval_bounds_are_ordered() {
-        assert!(MIN_NOTIFY_TIMER_INTERVAL_MIN <= DEFAULT_NOTIFY_TIMER_INTERVAL_MIN);
-        assert!(DEFAULT_NOTIFY_TIMER_INTERVAL_MIN <= MAX_NOTIFY_TIMER_INTERVAL_MIN);
+        const { assert!(MIN_NOTIFY_TIMER_INTERVAL_MIN <= DEFAULT_NOTIFY_TIMER_INTERVAL_MIN) };
+        const { assert!(DEFAULT_NOTIFY_TIMER_INTERVAL_MIN <= MAX_NOTIFY_TIMER_INTERVAL_MIN) };
         // 默认 10 分钟：定时推送是主动推送，太密会变成噪音
         assert_eq!(DEFAULT_NOTIFY_TIMER_INTERVAL_MIN, 10);
         // 上限 24 小时 = 1440 分钟
@@ -1393,11 +1395,11 @@ mod tests {
     fn push_rate_defaults_are_sane_against_qq_platform_limits() {
         // 默认值必须真的能防刷屏：一小时一条
         assert_eq!(DEFAULT_NOTIFY_SIGNAL_MIN_INTERVAL_MIN, 60);
-        assert!(DEFAULT_NOTIFY_SIGNAL_MIN_INTERVAL_MIN <= MAX_NOTIFY_SIGNAL_MIN_INTERVAL_MIN);
+        const { assert!(DEFAULT_NOTIFY_SIGNAL_MIN_INTERVAL_MIN <= MAX_NOTIFY_SIGNAL_MIN_INTERVAL_MIN) };
         // QQ 节流默认值必须压在平台频控（单关系 20 条/分钟、群 30~60 条/分钟）以下，
         // 否则「防拒收」这个目的达不到。
-        assert!(DEFAULT_QQ_MAX_PER_MIN > 0 && DEFAULT_QQ_MAX_PER_MIN < 20);
-        assert!(DEFAULT_QQ_MAX_PER_MIN <= MAX_QQ_MAX_PER_MIN);
+        const { assert!(DEFAULT_QQ_MAX_PER_MIN > 0 && DEFAULT_QQ_MAX_PER_MIN < 20) };
+        const { assert!(DEFAULT_QQ_MAX_PER_MIN <= MAX_QQ_MAX_PER_MIN) };
         // 换算成最小发送间隔：10 条/分钟 = 每条至少 6 秒（整数除法，宁可更保守）
         assert_eq!(60 / DEFAULT_QQ_MAX_PER_MIN, 6);
     }
@@ -1431,11 +1433,11 @@ mod tests {
 
     #[test]
     fn poll_bounds_are_ordered() {
-        assert!(MIN_NOTIFY_POLL_INTERVAL_SECS <= DEFAULT_NOTIFY_POLL_INTERVAL_SECS);
-        assert!(DEFAULT_NOTIFY_POLL_INTERVAL_SECS <= MAX_NOTIFY_POLL_INTERVAL_SECS);
+        const { assert!(MIN_NOTIFY_POLL_INTERVAL_SECS <= DEFAULT_NOTIFY_POLL_INTERVAL_SECS) };
+        const { assert!(DEFAULT_NOTIFY_POLL_INTERVAL_SECS <= MAX_NOTIFY_POLL_INTERVAL_SECS) };
         // 30 秒下限的意义：QQ 主动消息频控是单关系 20 条/分钟，
         // 间隔比这更密就算每次都推也发不出去，只会被频控拦掉。
-        assert!(MIN_NOTIFY_POLL_INTERVAL_SECS >= 30);
+        const { assert!(MIN_NOTIFY_POLL_INTERVAL_SECS >= 30) };
         assert!(MIN_NOTIFY_POLL_DELTA_DB <= DEFAULT_SIGNAL_DELTA_DB as i64);
         assert!(DEFAULT_SIGNAL_DELTA_DB as i64 <= MAX_NOTIFY_POLL_DELTA_DB);
     }
