@@ -30,12 +30,12 @@ const AGENTS = path.join(root, 'AGENTS.md');
 const WORKFLOW = path.join(root, '.github', 'workflows', 'checks.yml');
 
 /* 文案单一事实源：授权调整时先改这里，再按 AGENTS.md 联动清单同步另外三处。 */
-const AUTHOR_NAME = 'LianXia233';
+const AUTHOR_NAME = '我是挖洋镐的';
 const AUTHOR_ROLE = '开发与维护';
 const COPYRIGHT_YEAR = '2026';
 const AUTHOR_TEXT = '© ' + COPYRIGHT_YEAR + ' ' + AUTHOR_NAME + ' · ' + AUTHOR_ROLE;
 const AUTHOR_LICENSE = 'GPL-3.0-only';
-const AUTHOR_URL = 'https://github.com/LianXia233/luci-app-mt5700';
+const AUTHOR_URL = 'https://github.com/qqzwqq/luci-app-mt5700';
 const LEGACY_LABEL = '作者：';
 /* 真正进入过 main 的历史文案；比对时拼成 "}, '<text>')" 字面量，
  * 避免「© 2026 …」包含「LianXia233 · 开发与维护」子串时误判。
