@@ -2,18 +2,17 @@
 /**
  * 作者署名回归检查（服务配置页 admin/modem/5g/config）
  *
- * 保护对象：页面底部「我是挖洋镐的」署名、指向维护者仓库的链接，
- * 以及独立的 SPDX 许可证标识「GPL-3.0-only」。
- * 上游来源说明见 AGENTS.md「作者署名保护规则」。
+ * 保护对象：页脚署名「© 2026 LianXia233 · 开发与维护」、许可证标识
+ * 「GPL-3.0-only」及其指向主仓库的链接。见 AGENTS.md「作者署名保护规则」。
  *
  * 覆盖：
  *   1) 视图 service.js 存在署名 DOM，且追加在底部操作栏之后；
- *   2) 链接地址、target/rel 安全属性及许可证节点正确；
- *   3) 旧署名及上游历史文案不得回退到页面 DOM；
- *   4) 署名样式、移动端断点、键盘焦点与窄屏换行正常；
- *   5) 署名未被扩散到其他视图页面；
- *   6) AGENTS.md 与 checks.yml 同步声明当前署名及 SPDX；
- *   7) 相关文件保持 LF 行尾。
+ *   2) 文案 / SPDX 以本文件常量为单一事实源，链接带 target/rel 安全属性；
+ *   3) 旧前缀标签与历史文案不得回退（按完整字符串字面量比对，避免子串误判）；
+ *   4) 署名样式类存在于 mt5700.css（低对比、居中、键盘焦点、窄屏换行）；
+ *   5) 署名未被扩散到其他视图页面（仅限本页）；
+ *   6) 维护规则已写入 AGENTS.md，且 checks.yml 同步声明现行文案与 SPDX；
+ *   7) 相关文件保持 LF 行尾（CRLF 会导致 BusyBox/procd 侧异常）。
  *
  * 运行：node tests/author-attribution-test.js
  */
@@ -22,25 +21,28 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..');
-const viewDir = path.join(root, 'htdocs', 'luci-static', 'resources', 'view', 'at-webserver');
-const libDir = path.join(root, 'htdocs', 'luci-static', 'resources', 'at-webserver');
+const viewDir = path.join(root, 'htdocs', 'luci-static', 'resources', 'view', 'mt5700d');
+const libDir = path.join(root, 'htdocs', 'luci-static', 'resources', 'mt5700d');
 
 const SERVICE_VIEW = path.join(viewDir, 'service.js');
 const CSS = path.join(libDir, 'mt5700.css');
 const AGENTS = path.join(root, 'AGENTS.md');
 const WORKFLOW = path.join(root, '.github', 'workflows', 'checks.yml');
 
-/* 当前页面署名、许可证与链接：文案调整时同步维护 AGENTS.md 和 checks.yml。 */
-const AUTHOR_TEXT = '我是挖洋镐的';
+/* 文案单一事实源：授权调整时先改这里，再按 AGENTS.md 联动清单同步另外三处。 */
+const AUTHOR_NAME = '我是挖洋镐的';
+const AUTHOR_ROLE = '开发与维护';
+const COPYRIGHT_YEAR = '2026';
+const AUTHOR_TEXT = '© ' + COPYRIGHT_YEAR + ' ' + AUTHOR_NAME + ' · ' + AUTHOR_ROLE;
 const AUTHOR_LICENSE = 'GPL-3.0-only';
 const AUTHOR_URL = 'https://github.com/qqzwqq/luci-app-mt5700';
-
-/* 上游及历史署名仅作为防回退检查，不得重新出现在页面 DOM 中。 */
+const LEGACY_LABEL = '作者：';
+/* 真正进入过 main 的历史文案；比对时拼成 "}, '<text>')" 字面量，
+ * 避免「© 2026 …」包含「LianXia233 · 开发与维护」子串时误判。
+ * 未推送的中间态 Copyright (C) 写法由下方单独断言覆盖。 */
 const HISTORICAL_TEXTS = [
-        '© 2026 LianXia233 · 开发与维护',
-        '作者：LianXia233',
-        'LianXia233 · 开发与维护',
-        'Copyright (C)'
+	'作者：LianXia233',
+	'LianXia233 · 开发与维护'
 ];
 
 const results = [];
@@ -66,22 +68,28 @@ check('service.js: 存在 .mt5700-author 容器', authorIdx > 0);
 check('service.js: 署名容器在底部操作栏之后', authorIdx > actionsIdx && actionsIdx > 0);
 check('service.js: 署名容器在 render 返回之前', authorIdx < returnIdx);
 check('service.js: 能完整截取署名 DOM 片段', authorBlock.length > 0);
-check('service.js: 署名文案为当前维护者署名',
-        authorBlock.indexOf("}, '" + AUTHOR_TEXT + "')") > 0);
+check('service.js: 署名文案为「' + AUTHOR_TEXT + '」',
+	authorBlock.indexOf("}, '" + AUTHOR_TEXT + "')") > 0);
+check('service.js: © 版权写法与年份', authorBlock.indexOf('© ' + COPYRIGHT_YEAR) > 0);
+check('service.js: 文案含作者标识', authorBlock.indexOf(AUTHOR_NAME) > 0);
+check('service.js: 文案含开发与维护角色说明', authorBlock.indexOf(AUTHOR_ROLE) > 0);
+check('service.js: 不再使用旧前缀标签',
+	authorBlock.indexOf("'" + LEGACY_LABEL + "'") < 0);
 check('service.js: 历史文案不得回退',
-        HISTORICAL_TEXTS.every(function (t) {
-                return authorBlock.indexOf(t) < 0;
-        }));
+	HISTORICAL_TEXTS.every(function (t) {
+		return authorBlock.indexOf("}, '" + t + "')") < 0;
+	}));
+check('service.js: 不再残留 Copyright (C) 写法',
+	authorBlock.indexOf('Copyright (C)') < 0);
 check('service.js: 许可证标识为 ' + AUTHOR_LICENSE,
-        authorBlock.indexOf("}, '" + AUTHOR_LICENSE + "')") > 0);
+	authorBlock.indexOf("}, '" + AUTHOR_LICENSE + "')") > 0);
 check('service.js: 许可证节点复用 mt5700-author-license',
-        authorBlock.indexOf("'class': 'mt5700-author-license'") > 0);
+	authorBlock.indexOf("'class': 'mt5700-author-license'") > 0);
 check('service.js: 许可证节点为纯文本（非链接）',
-        (authorBlock.match(/E\('a'/g) || []).length === 1 &&
-        (authorBlock.match(/E\('span'/g) || []).length === 1);
-check('service.js: 容器内无残留旧署名标签',
-        authorBlock.indexOf('mt5700-author-label') < 0 &&
-        authorBlock.indexOf("'作者：'") < 0);
+	(authorBlock.match(/E\('a'/g) || []).length === 1 &&
+	(authorBlock.match(/E\('span'/g) || []).length === 1);
+check('service.js: 容器内无残留 label 节点',
+	authorBlock.indexOf('mt5700-author-label') < 0);
 check('service.js: 链接指向主仓库', view.indexOf("'href': '" + AUTHOR_URL + "'") > 0);
 check('service.js: 外链使用 _blank', view.indexOf("'target': '_blank'") > 0);
 check('service.js: 外链带 noopener noreferrer', view.indexOf("'rel': 'noopener noreferrer'") > 0);
@@ -133,7 +141,7 @@ const workflow = read(WORKFLOW);
 check('AGENTS.md: 存在作者署名保护规则章节', agents.indexOf('作者署名保护规则') > 0);
 check('AGENTS.md: 明确指定 admin/modem/5g/config', agents.indexOf('admin/modem/5g/config') > 0);
 check('AGENTS.md: 明确要求保留署名与链接',
-	agents.indexOf('都必须保留当前署名及其链接') > 0);
+	agents.indexOf('都必须保留该署名及其链接') > 0);
 check('AGENTS.md: 明确维护者授权前提',
 	agents.indexOf('除非项目维护者明确授权') > 0);
 check('AGENTS.md: 记录署名实现位置', agents.indexOf('service.js') > 0 && agents.indexOf(AUTHOR_URL) > 0);

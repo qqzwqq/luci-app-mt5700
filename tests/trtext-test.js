@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
-const js = fs.readFileSync(path.join(root, 'htdocs/luci-static/resources/at-webserver/mt5700.js'), 'utf8');
+const js = fs.readFileSync(path.join(root, 'htdocs/luci-static/resources/mt5700d/mt5700.js'), 'utf8');
 assert.match(js, /function trText\(s\)/, '共享文案翻译入口必须使用 trText');
 assert.match(js, /api\.tr = trText/, '翻译入口应公开给视图复用');
 assert.match(js, /return \(h == null\) \? '' : trText\(String\(h\)\)/, '表格 data-label 文案必须走 trText');
