@@ -43,24 +43,39 @@ log() { logger -t mt5700d "迁移: $*" 2>/dev/null || true; }
 # 1a. 正常升级：preinst 已在解包前保存旧配置。此刻新默认文件已经落地，
 #     必须用备份覆盖它，否则用户配置会被默认值顶掉。
 if [ -f /etc/mt5700d-migrate/legacy-config ]; then
-	cp -f /etc/mt5700d-migrate/legacy-config /etc/config/mt5700d
-	sed -i -e 's#at-webserver#mt5700d#g' \
-	       -e 's#at-notifications[.]log#mt5700d-notifications.log#g' \
-	       /etc/config/mt5700d 2>/dev/null
-	rm -rf /etc/mt5700d-migrate
-	# 旧文件若未被包管理器删除，留着会让 uci 同时加载两份配置
-	rm -f /etc/config/at-webserver
-	log "已用 preinst 保存的旧配置恢复 /etc/config/mt5700d"
+	# 先写同目录临时文件，转换成功后再原子替换目标；任何一步失败都保留
+	# preinst 备份与旧配置，绝不因磁盘空间不足/写入失败而删掉唯一副本。
+	if cp -f /etc/mt5700d-migrate/legacy-config /etc/config/mt5700d.migrating \
+		&& sed -i -e 's#at-webserver#mt5700d#g' \
+		          -e 's#at-notifications[.]log#mt5700d-notifications.log#g' \
+		          /etc/config/mt5700d.migrating \
+		&& mv -f /etc/config/mt5700d.migrating /etc/config/mt5700d; then
+		rm -rf /etc/mt5700d-migrate
+		# 旧文件若未被包管理器删除，留着会让 uci 同时加载两份配置
+		rm -f /etc/config/at-webserver
+		log "已用 preinst 保存的旧配置恢复 /etc/config/mt5700d"
+	else
+		rm -f /etc/config/mt5700d.migrating
+		log "错误：旧 UCI 配置迁移失败，已保留原始备份；请勿启动新版服务"
+		exit 1
+	fi
 fi
 
 # 1b. 兜底：只执行 uci-defaults、没有经过 preinst 的场景（刷机、手动解包、
 #     从备份恢复 overlay），旧文件仍在且目标尚不存在时直接搬迁。
 if [ -f /etc/config/at-webserver ] && [ ! -f /etc/config/mt5700d ]; then
-	mv -f /etc/config/at-webserver /etc/config/mt5700d
-	sed -i -e 's#at-webserver#mt5700d#g' \
-	       -e 's#at-notifications[.]log#mt5700d-notifications.log#g' \
-	       /etc/config/mt5700d 2>/dev/null
-	log "已将 UCI 配置迁移到 /etc/config/mt5700d"
+	if cp -f /etc/config/at-webserver /etc/config/mt5700d.migrating \
+		&& sed -i -e 's#at-webserver#mt5700d#g' \
+		          -e 's#at-notifications[.]log#mt5700d-notifications.log#g' \
+		          /etc/config/mt5700d.migrating \
+		&& mv -f /etc/config/mt5700d.migrating /etc/config/mt5700d; then
+		rm -f /etc/config/at-webserver
+		log "已将 UCI 配置迁移到 /etc/config/mt5700d"
+	else
+		rm -f /etc/config/mt5700d.migrating
+		log "错误：旧 UCI 配置迁移失败，已保留原始配置；请勿启动新版服务"
+		exit 1
+	fi
 fi
 
 # --- 2. 短信归档（overlay 上的用户数据，丢了不可恢复）------------------------
