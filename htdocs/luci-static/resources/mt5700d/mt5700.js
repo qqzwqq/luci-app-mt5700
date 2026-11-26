@@ -137,7 +137,7 @@ if (window.AtTheme) window.AtTheme.injectCss('/luci-static/resources/mt5700d/md3
 		applyChars();
 	}
 
-	/* 极简模式判定：背景层与看板娘都靠它决定是否真正卸载 */
+	/* 极简模式判定：全局背景层是否真正卸载 */
 	function isMinimal() {
 		try {
 			return !!(window.AtUimode && typeof window.AtUimode.current === 'function'
@@ -634,30 +634,6 @@ var Mt5700 = (function () {
 		svg.appendChild(badge);
 
 		return svg;
-	};
-
-	/*
-	 * 看板娘：保留头像本体（图片 + 悬浮动效），对话气泡功能已移除。
-	 * 之前的气泡会挤占英雄栏标题并在窄屏下遮挡内容，按需求不再提供。
-	 */
-	api.mascot = function () {
-		var wrap = E('div', { 'class': 'mt-mascot-speech-wrap' });
-
-		/* 极简模式：返回空容器，连 img 节点都不创建 —— 不发起 mascot.png 请求。
-		 * 普通模式下面这段原样保留，视觉零变化。 */
-		if (isMinimal()) return { el: wrap };
-
-		// 二次元蓝发猫耳看板娘头像图片，外圈带光环与悬浮动效
-		var avatar = E('div', { 'class': 'mt-mascot-avatar' });
-		var img = E('img', {
-			'class': 'mt-mascot-img',
-			'src': '/luci-static/resources/mt5700d/mascot.png?v=' + MT5700_CSS_VERSION,
-			'alt': '可可的看板娘'
-		});
-		avatar.appendChild(img);
-		wrap.appendChild(avatar);
-
-		return { el: wrap };
 	};
 
 	/* ================= 四格动态信号图标 (cellular signal) =================
