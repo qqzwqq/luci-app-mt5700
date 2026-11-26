@@ -137,7 +137,7 @@
 
 ## 5. 权利主张渠道
 
-如权利人认为本项目的使用超出合理范围，请通过 [GitHub Issues](https://github.com/LianXia233/luci-app-mt5700/issues) 提出，并附：
+如权利人认为本项目的使用超出合理范围，请通过 [GitHub Issues](https://github.com/qqzwqq/luci-app-mt5700/issues) 提出，并附：
 
 1. 权利证明（著作权登记、授权链或官方声明）；
 2. 具体文件路径与使用位置；
