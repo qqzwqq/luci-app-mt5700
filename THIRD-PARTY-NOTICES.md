@@ -84,27 +84,20 @@
 
 ### 2.2 使用清单与文件指纹
 
-四张 WebP 均为**静态单帧**（非动图），`pc` 与 `mobile` 是同一插画的不同裁切，`dark` / `light` 分别对应普拉娜 / 阿罗娜。以下 SHA-256 取自主分支 `v1.32.9` 的实际文件。
+四张 WebP 均为**静态单帧**（非动图），`pc` 与 `mobile` 是同一插画的不同裁切，
+`dark` / `light` 分别对应普拉娜 / 阿罗娜。本次 v2.0.2 迁移保留 fork 原分支
+`7156518` 中的四张背景图原始字节，不采用上游替换后的图稿；文件路径随资源目录
+从 `at-webserver` 改为 `mt5700d`。以下尺寸以 Git 对象记录的字节数为准，Git blob
+标识用于精确定位文件内容（不是 SHA-256）：
 
-| 文件路径 | 尺寸 / 格式 | 角色设定 / 界面用途 | SHA-256（前 16 位） |
-| :--- | :--- | :--- | :---: |
-| `htdocs/luci-static/resources/mt5700d/bg/character-pc-dark.webp` | 1000×1000，WebP 单帧，98,340 B | 普拉娜 · 普通模式桌面深色背景 | `8c5bd7aa2f53bf52` |
-| `htdocs/luci-static/resources/mt5700d/bg/character-pc-light.webp` | 1000×1000，WebP 单帧，106,368 B | 阿罗娜 · 普通模式桌面浅色背景 | `91f5831319570014` |
-| `htdocs/luci-static/resources/mt5700d/bg/character-mobile-dark.webp` | 840×1120，WebP 单帧，87,770 B | 普拉娜 · 普通模式移动端深色背景 | `fc4aa644dcf5ab78` |
-| `htdocs/luci-static/resources/mt5700d/bg/character-mobile-light.webp` | 840×1120，WebP 单帧，93,070 B | 阿罗娜 · 普通模式移动端浅色背景 | `4d820a655c2cfed2` |
-| `htdocs/luci-static/resources/mt5700d/mascot.png` | 320×320，PNG RGBA，162,214 B | 薄荷 · 英雄卡片圆形头像 | `b3b74e811f954d71` |
-| `docs/images/mascot.png` | 320×320，PNG RGBA | 上者的文档站副本（同一文件） | `b3b74e811f954d71` |
-| `docs/images/*.png` | 界面截图 | README 与 Release 说明中的界面展示（含上述角色形象） | 随截图更新 |
-
-完整 SHA-256 校验和（便于权利人核验与比对去重）：
-
-```text
-character-pc-dark.webp      8c5bd7aa2f53bf52e020693bba1b5114e6a6b22d173918aa19866bccf7a54360
-character-pc-light.webp     91f5831319570014c009919e1e20ddbc0d1014b61cf39ac0ed1d1936fef5f7fa
-character-mobile-dark.webp  fc4aa644dcf5ab7821598061298a4a23cb429d94e41ffe5570163b478dd95cae
-character-mobile-light.webp 4d820a655c2cfed247e9a5d425ca2e805b255aee4c4207143c4b8c157b701718
-mascot.png                  b3b74e811f954d7126c161944348af6653a05136c3bb3f701802417d0fcba935
-```
+| 文件路径 | 文件大小 | 角色 / 用途 | Git blob SHA |
+|:--|--:|:--|:--|
+| `htdocs/luci-static/resources/mt5700d/bg/character-pc-dark.webp` | 254,612 B | 普拉娜 · 普通模式桌面深色背景 | `1dd7a67627ca6d76c8d825096526420136543011` |
+| `htdocs/luci-static/resources/mt5700d/bg/character-pc-light.webp` | 222,512 B | 阿罗娜 · 普通模式桌面浅色背景 | `583ece0bc437171d1fc6107e1f14322258064e47` |
+| `htdocs/luci-static/resources/mt5700d/bg/character-mobile-dark.webp` | 221,018 B | 普拉娜 · 普通模式移动端深色背景 | `72679e71f41e71315b2355b26fdc276692120924` |
+| `htdocs/luci-static/resources/mt5700d/bg/character-mobile-light.webp` | 194,214 B | 阿罗娜 · 普通模式移动端浅色背景 | `cf0af8850e3a74cf5dbce9717b51d8786d76e28a` |
+| `htdocs/luci-static/resources/mt5700d/mascot.png` | 162,214 B | 薄荷 · 英雄卡片圆形头像（与迁移前相同） | `6bdb92934ca18178f0cc48fc83a7a1a2dfd811ac` |
+| `docs/images/mascot.png` | 162,214 B | 上者的文档站副本（同一 Git blob） | `6bdb92934ca18178f0cc48fc83a7a1a2dfd811ac` |
 
 ### 2.3 授权状态与来源说明
 
