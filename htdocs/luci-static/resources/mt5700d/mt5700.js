@@ -239,29 +239,6 @@ var Mt5700 = (function () {
 		return el;
 	}
 
-	/* 看板娘由统一的模式钩子管理：极简模式下**不创建 img 节点**（不请求
-	 * mascot.png），切回普通模式再插入。只注册一次监听，切页不会累积闭包。
-	 *
-	 * root：可选的作用域。`api.page()` 里页面节点尚未挂到 document，
-	 * 必须把 node 传进来才能在挂载前找到它自己的 `.mt5700-hero-art`；
-	 * 否则 `document.querySelectorAll` 什么也找不到，看板娘永远不会插入。 */
-	function syncMascots(root) {
-		var scope = root || document;
-		if (typeof document === 'undefined' || !scope.querySelectorAll
-			|| typeof api.mascot !== 'function') return;
-		var minimal = isMinimal();
-		var arts = scope.querySelectorAll('.mt5700-hero-art');
-		for (var i = 0; i < arts.length; i++) {
-			var art = arts[i];
-			var existing = art.querySelector('.mt-mascot-speech-wrap');
-			if (minimal) {
-				if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
-			} else if (!existing) {
-				art.insertBefore(api.mascot().el, art.firstChild);
-			}
-		}
-	}
-
 	/* ---- hero 栏（页面标题卡）：极简模式真卸载 ----
 	 * hero 是装饰性标题卡（徽标 + 大标题 + 副标题 + 插画），页面身份已由 LuCI
 	 * 面包屑与菜单标题表达，极简模式下重复一遍只是占竖向空间。
@@ -282,7 +259,6 @@ var Mt5700 = (function () {
 			content.appendChild(E('p', { 'class': 'mt5700-hero-desc' }, a.subtitle));
 		}
 		hero.appendChild(content);
-		hero.appendChild(E('div', { 'class': 'mt5700-hero-art' }));
 		if (a.extraClass) hero.classList.add(a.extraClass);
 		return hero;
 	}
@@ -311,7 +287,6 @@ var Mt5700 = (function () {
 					if (typeof document === 'undefined' || !document.querySelectorAll) return;
 					var pages = document.querySelectorAll('.mt5700-page');
 					for (var i = 0; i < pages.length; i++) syncHero(pages[i]);
-					syncMascots();
 				});
 			}
 		} catch (e) { /* ignore */ }
@@ -829,7 +804,6 @@ var Mt5700 = (function () {
 		/* hero 按模式创建/移除；bindMode() 有单例守卫，多页不会重复注册事件 */
 		bindMode();
 		syncHero(node);
-		syncMascots(node);
 
 		return node;
 	};
