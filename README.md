@@ -6,19 +6,19 @@
 
 **适用于 OpenWrt / ImmortalWrt 平台的 MT5700M 5G 模组全功能控制中心与常驻守护套件**
 
-[![Version](https://img.shields.io/badge/Version-v2.0.2-3b82f6?style=flat-square&logo=git&logoColor=white)](CHANGELOG.md)
-[![OpenWrt CI](https://img.shields.io/github/actions/workflow/status/LianXia233/luci-app-mt5700/build-openwrt.yml?branch=main&label=Build%20OpenWrt&style=flat-square&logo=githubactions&logoColor=white)](https://github.com/qqzwqq/luci-app-mt5700/actions/workflows/build-openwrt.yml)
-[![Static Checks](https://img.shields.io/github/actions/workflow/status/LianXia233/luci-app-mt5700/checks.yml?branch=main&label=Checks&style=flat-square&logo=githubactions&logoColor=white)](https://github.com/qqzwqq/luci-app-mt5700/actions/workflows/checks.yml)
+[![Version](https://img.shields.io/badge/Version-v2.1.0-3b82f6?style=flat-square&logo=git&logoColor=white)](CHANGELOG.md)
+[![OpenWrt CI](https://img.shields.io/github/actions/workflow/status/LianXia233/luci-app-mt5700/build-openwrt.yml?branch=main&label=Build%20OpenWrt&style=flat-square&logo=githubactions&logoColor=white)](https://github.com/LianXia233/luci-app-mt5700/actions/workflows/build-openwrt.yml)
+[![Static Checks](https://img.shields.io/github/actions/workflow/status/LianXia233/luci-app-mt5700/checks.yml?branch=main&label=Checks&style=flat-square&logo=githubactions&logoColor=white)](https://github.com/LianXia233/luci-app-mt5700/actions/workflows/checks.yml)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square&logo=gnu&logoColor=white)](LICENSE)
 
 [![OpenWrt](https://img.shields.io/badge/OpenWrt-24.10%20%7C%2025.x-00C49F?style=flat-square&logo=openwrt&logoColor=white)](https://openwrt.org/)
 [![ImmortalWrt](https://img.shields.io/badge/ImmortalWrt-Compatible-f97316?style=flat-square)](https://immortalwrt.org/)
 [![Backend](https://img.shields.io/badge/Backend-Rust%20%7C%20Tokio-DEA584?style=flat-square&logo=rust&logoColor=white)](src/rust/)
-[![Architecture](https://img.shields.io/badge/Arch-x86__64%20%7C%20aarch64-8b5cf6?style=flat-square)](https://github.com/qqzwqq/luci-app-mt5700/releases)
+[![Architecture](https://img.shields.io/badge/Arch-x86__64%20%7C%20aarch64-8b5cf6?style=flat-square)](https://github.com/LianXia233/luci-app-mt5700/releases)
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-0ea5e9?style=flat-square&logo=googlechrome&logoColor=white)](https://lianxia233.github.io/luci-app-mt5700/)
-[![GitHub Stars](https://img.shields.io/github/stars/LianXia233/luci-app-mt5700?style=flat-square&logo=github)](https://github.com/qqzwqq/luci-app-mt5700/stargazers)
-[![主仓库](https://img.shields.io/badge/主仓库-GitHub-181717?style=flat-square&logo=github)](https://github.com/qqzwqq/luci-app-mt5700)
+[![GitHub Stars](https://img.shields.io/github/stars/LianXia233/luci-app-mt5700?style=flat-square&logo=github)](https://github.com/LianXia233/luci-app-mt5700/stargazers)
+[![主仓库](https://img.shields.io/badge/主仓库-GitHub-181717?style=flat-square&logo=github)](https://github.com/LianXia233/luci-app-mt5700)
 [![镜像仓库](https://img.shields.io/badge/镜像仓库-CNB-2F54EB?style=flat-square)](https://cnb.cool/LianXia233/luci-app-mt5700)
 
 <p align="center">
@@ -33,9 +33,9 @@
 > [!NOTE]
 > **📌 仓库定位**
 >
-> - **GitHub 是主仓库**：[LianXia233/luci-app-mt5700](https://github.com/qqzwqq/luci-app-mt5700) —— 源码、Issue 追踪、Release 发布均以此为准；
-> - **上游 CNB 镜像**：[cnb.cool/LianXia233/luci-app-mt5700](https://cnb.cool/LianXia233/luci-app-mt5700) —— 内容与主仓库保持同步，方便国内网络高速访问与固件包下载；
-> - **提 Issue / 提建议请优先使用 GitHub**（[Issues](https://github.com/qqzwqq/luci-app-mt5700/issues)）。
+> - **GitHub 是主仓库**：[LianXia233/luci-app-mt5700](https://github.com/LianXia233/luci-app-mt5700) —— 源码、Issue 追踪、Release 发布均以此为准；
+> - **CNB 是镜像仓库**：[cnb.cool/LianXia233/luci-app-mt5700](https://cnb.cool/LianXia233/luci-app-mt5700) —— 内容与主仓库保持同步，方便国内网络高速访问与固件包下载；
+> - **提 Issue / 提建议请优先使用 GitHub**（[Issues](https://github.com/LianXia233/luci-app-mt5700/issues)）。
 
 > [!WARNING]
 > **⚠️ 独占运行与兼容性说明**
@@ -122,7 +122,7 @@
 
 ### 2. 软件包下载与安装
 
-前往 [GitHub Releases](https://github.com/qqzwqq/luci-app-mt5700/releases) 或 [CNB 镜像 Releases](https://cnb.cool/LianXia233/luci-app-mt5700/-/releases) 下载与架构匹配的安装包（主包 + 简体中文语言包）。每个 Release 同时附带 `SHA256SUMS`，建议先校验再安装：
+前往 [GitHub Releases](https://github.com/LianXia233/luci-app-mt5700/releases) 或 [CNB 镜像 Releases](https://cnb.cool/LianXia233/luci-app-mt5700/-/releases) 下载与架构匹配的安装包（主包 + 简体中文语言包）。每个 Release 同时附带 `SHA256SUMS`，建议先校验再安装：
 
 ```sh
 # 下载主包、语言包与 SHA256SUMS 到同一目录后
@@ -624,7 +624,7 @@ MT5700M 模组只有一个主控制 AT 串口（PC UI）。QModem 与本插件�
 
 - **授权状态**：本仓库尚未取得权利人的书面许可，也未留存可核验的官方开放许可；项目开源或非商业使用的描述均不构成权利人的授权。
 - **保留决定与分发风险**：按维护者决定，上述素材继续保留在界面与安装包内作装饰用途。这不是权利人的授权，也不能仅凭素材与 GPL 代码同包分发就断言其属于 GPLv3 所称的独立聚合。安装包会附带 `ARTWORK-NOTICE.txt` 说明权利归属；若权利人提出异议，将移除或替换。
-- **完整清单**：逐文件大小与 Git blob 标识、角色识别依据、图稿性质、授权状态与处置要求见 [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md) 第 2 节。背景图为二次创作插画，绘师与原始出处未在仓库内留存，角色身份识别未经权利人确认。
+- **完整清单**：逐文件尺寸与 SHA-256 指纹、角色识别依据、图稿性质、授权状态与处置要求见 [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md) 第 2 节。背景图为二次创作插画，绘师与原始出处未在仓库内留存，角色身份识别未经权利人确认。
 
 ### 第三方软件依赖与许可证
 

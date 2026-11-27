@@ -84,20 +84,27 @@
 
 ### 2.2 使用清单与文件指纹
 
-四张 WebP 均为**静态单帧**（非动图），`pc` 与 `mobile` 是同一插画的不同裁切，
-`dark` / `light` 分别对应普拉娜 / 阿罗娜。本次 v2.0.2 迁移保留 fork 原分支
-`7156518` 中的四张背景图原始字节，不采用上游替换后的图稿；文件路径随资源目录
-从 `at-webserver` 改为 `mt5700d`。以下尺寸以 Git 对象记录的字节数为准，Git blob
-标识用于精确定位文件内容（不是 SHA-256）：
+四张 WebP 均为**静态单帧**（非动图），`pc` 与 `mobile` 是同一插画的不同裁切，`dark` / `light` 分别对应普拉娜 / 阿罗娜。以下 SHA-256 取自主分支 `v1.32.9` 的实际文件。
 
-| 文件路径 | 文件大小 | 角色 / 用途 | Git blob SHA |
-|:--|--:|:--|:--|
-| `htdocs/luci-static/resources/mt5700d/bg/character-pc-dark.webp` | 254,612 B | 普拉娜 · 普通模式桌面深色背景 | `1dd7a67627ca6d76c8d825096526420136543011` |
-| `htdocs/luci-static/resources/mt5700d/bg/character-pc-light.webp` | 222,512 B | 阿罗娜 · 普通模式桌面浅色背景 | `583ece0bc437171d1fc6107e1f14322258064e47` |
-| `htdocs/luci-static/resources/mt5700d/bg/character-mobile-dark.webp` | 221,018 B | 普拉娜 · 普通模式移动端深色背景 | `72679e71f41e71315b2355b26fdc276692120924` |
-| `htdocs/luci-static/resources/mt5700d/bg/character-mobile-light.webp` | 194,214 B | 阿罗娜 · 普通模式移动端浅色背景 | `cf0af8850e3a74cf5dbce9717b51d8786d76e28a` |
-| `htdocs/luci-static/resources/mt5700d/mascot.png` | 162,214 B | 薄荷 · 英雄卡片圆形头像（与迁移前相同） | `6bdb92934ca18178f0cc48fc83a7a1a2dfd811ac` |
-| `docs/images/mascot.png` | 162,214 B | 上者的文档站副本（同一 Git blob） | `6bdb92934ca18178f0cc48fc83a7a1a2dfd811ac` |
+| 文件路径 | 尺寸 / 格式 | 角色设定 / 界面用途 | SHA-256（前 16 位） |
+| :--- | :--- | :--- | :---: |
+| `htdocs/luci-static/resources/mt5700d/bg/character-pc-dark.webp` | 1000×1000，WebP 单帧，98,340 B | 普拉娜 · 普通模式桌面深色背景 | `8c5bd7aa2f53bf52` |
+| `htdocs/luci-static/resources/mt5700d/bg/character-pc-light.webp` | 1000×1000，WebP 单帧，106,368 B | 阿罗娜 · 普通模式桌面浅色背景 | `91f5831319570014` |
+| `htdocs/luci-static/resources/mt5700d/bg/character-mobile-dark.webp` | 840×1120，WebP 单帧，87,770 B | 普拉娜 · 普通模式移动端深色背景 | `fc4aa644dcf5ab78` |
+| `htdocs/luci-static/resources/mt5700d/bg/character-mobile-light.webp` | 840×1120，WebP 单帧，93,070 B | 阿罗娜 · 普通模式移动端浅色背景 | `4d820a655c2cfed2` |
+| `htdocs/luci-static/resources/mt5700d/mascot.png` | 320×320，PNG RGBA，162,214 B | 薄荷 · 英雄卡片圆形头像 | `b3b74e811f954d71` |
+| `docs/images/mascot.png` | 320×320，PNG RGBA | 上者的文档站副本（同一文件） | `b3b74e811f954d71` |
+| `docs/images/*.png` | 界面截图 | README 与 Release 说明中的界面展示（含上述角色形象） | 随截图更新 |
+
+完整 SHA-256 校验和（便于权利人核验与比对去重）：
+
+```text
+character-pc-dark.webp      8c5bd7aa2f53bf52e020693bba1b5114e6a6b22d173918aa19866bccf7a54360
+character-pc-light.webp     91f5831319570014c009919e1e20ddbc0d1014b61cf39ac0ed1d1936fef5f7fa
+character-mobile-dark.webp  fc4aa644dcf5ab7821598061298a4a23cb429d94e41ffe5570163b478dd95cae
+character-mobile-light.webp 4d820a655c2cfed247e9a5d425ca2e805b255aee4c4207143c4b8c157b701718
+mascot.png                  b3b74e811f954d7126c161944348af6653a05136c3bb3f701802417d0fcba935
+```
 
 ### 2.3 授权状态与来源说明
 
@@ -137,7 +144,7 @@
 
 ## 5. 权利主张渠道
 
-如权利人认为本项目的使用超出合理范围，请通过 [GitHub Issues](https://github.com/qqzwqq/luci-app-mt5700/issues) 提出，并附：
+如权利人认为本项目的使用超出合理范围，请通过 [GitHub Issues](https://github.com/LianXia233/luci-app-mt5700/issues) 提出，并附：
 
 1. 权利证明（著作权登记、授权链或官方声明）；
 2. 具体文件路径与使用位置；
@@ -157,6 +164,7 @@
 - **动态图谱**：依赖条目数量随 `Cargo.toml`、目标平台、功能特性和传递依赖变化；请以当前 `Cargo.lock` 与 CI 生成的许可证报告为准，不在此处维护容易过期的固定数量。锁定图可能包含仅用于特定操作系统、架构或构建条件的依赖，**不等于最终固件实际打包的依赖数量**。
 - **策略审查 (cargo-deny)**：[`deny.toml`](deny.toml) 是依赖策略的检查入口。CI 执行 cargo-deny 的 `licenses`、`sources` 与 `bans` 检查：仅允许明确列出的许可证表达式和 crates.io registry，未知许可证、未知 registry 或未知 Git 来源会使检查失败；通配符依赖会被拒绝，重复版本会产生审查警告。新增许可证或来源必须先核实再加入策略。
 - **CA 根证书数据许可 (CDLA)**：`webpki-roots` `0.26.11` 与 `1.0.9` 携带 Mozilla CA 根证书数据，锁定元数据声明为 `CDLA-Permissive-2.0`；它们由 `tokio-tungstenite` 与 `ureq` 的 TLS 根证书功能引入。该协议第 2.1 条要求分享数据时一并提供协议文本，因此完整协议已随本包安装到 `/usr/share/licenses/luci-app-mt5700/CDLA-Permissive-2.0.txt`。
+- **扫码绑定新增依赖**：`aes-gcm 0.10.x`（`Apache-2.0 OR MIT`，含 `aes` / `ghash` / `polyval` / `subtle` / `zeroize` 等 RustCrypto 传递依赖）用于解密 QQ 开放平台回传的 AppSecret；`qrcodegen 1.8.x`（`MIT`）只用于生成二维码矩阵，不启用其图像/SVG 后端。两者均为纯 Rust 实现，不引入 C/OpenSSL 编译依赖；许可证表达式均落在 `deny.toml` 与 `about.toml` 现有白名单内，未新增许可类型。
 - **报告生成 (cargo-about)**：[`src/rust/about.toml`](src/rust/about.toml) 与 [`src/rust/about.hbs`](src/rust/about.hbs) 用于生成逐项依赖许可证报告。检查工作流会将报告写入 GitHub Actions **Summary**；正式构建工作流会在打包前生成 `RUST-DEPENDENCIES.md`，并随 APK/IPK 安装到 `/usr/share/licenses/luci-app-mt5700/RUST-DEPENDENCIES.md`，其中包含 crate、版本、许可证及许可证文本。
 - **协议分类明确**：`CDLA-Permissive-2.0` 属于数据许可，不应误记为项目源代码许可证；其完整文本保存在 `root/usr/share/licenses/luci-app-mt5700/CDLA-Permissive-2.0.txt`，并随 OpenWrt 软件包安装。
 - **人工审计边界**：自动化结果是审计辅助依据，不代表已对每个上游项目完成法律审查。分发前仍须核对对应锁定版本的上游许可证、版权声明、NOTICE 文件及再分发义务；不得把项目自身 GPL 声明套用到第三方依赖。
