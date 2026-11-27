@@ -102,8 +102,8 @@
 
 ## 二、作者署名保护规则
 
-- `LianXia233` 是本项目指定的作者署名标识。
-- 现行文案为 `© 2026 LianXia233 · 开发与维护`，其后另有许可证标识 `GPL-3.0-only`。
+- Fork 当前维护者署名标识为 `我是挖洋镐的`；上游原作者 LianXia233 的代码版权声明仍保留。
+- 现行文案为 `© 2026 我是挖洋镐的 · 开发与维护`，其后另有许可证标识 `GPL-3.0-only`。
 - 历史文案 `作者：LianXia233`（原始署名），现行文案见上条。
 - 页面 `admin/modem/5g/config` 中的作者署名及其 GitHub 链接属于明确要求保留的项目元素。
 - 任何 UI 重构、样式优化、代码迁移、组件替换、模板重写或 AI 自动修改，都必须保留该署名及其链接。
@@ -122,7 +122,7 @@
 | **署名样式** | `htdocs/luci-static/resources/mt5700d/mt5700.css` | 文件末尾「作者署名」小节，仅引用既有主题变量 |
 | **静态校验** | `tests/author-attribution-test.js` | 以 `AUTHOR_TEXT` 常量为准，含旧标签防回退、文档一致性与链接/样式回归检查 |
 
-署名文案固定为 `© 2026 LianXia233 · 开发与维护`，许可证标识固定为 `GPL-3.0-only`，链接固定指向 `https://github.com/LianXia233/luci-app-mt5700`，并使用 `target="_blank"` + `rel="noopener noreferrer"`。容器 `.mt5700-author` 内为单个链接节点，不再渲染旧前缀标签；`mt5700.css` 的 `.mt5700-author-label` 选择器保留为占位，不产生任何渲染效果。
+署名文案固定为 `© 2026 我是挖洋镐的 · 开发与维护`，许可证标识固定为 `GPL-3.0-only`，链接固定指向 `https://github.com/qqzwqq/luci-app-mt5700`，并使用 `target="_blank"` + `rel="noopener noreferrer"`。容器 `.mt5700-author` 内为单个链接节点，不再渲染旧前缀标签；`mt5700.css` 的 `.mt5700-author-label` 选择器保留为占位，不产生任何渲染效果。
 
 ### 署名文案变更联动清单
 
