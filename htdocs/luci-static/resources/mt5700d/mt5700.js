@@ -262,7 +262,6 @@ var Mt5700 = (function () {
 			content.appendChild(E('p', { 'class': 'mt5700-hero-desc' }, a.subtitle));
 		}
 		hero.appendChild(content);
-		hero.appendChild(E('div', { 'class': 'mt5700-hero-art' }));
 		if (a.extraClass) hero.classList.add(a.extraClass);
 		return hero;
 	}
