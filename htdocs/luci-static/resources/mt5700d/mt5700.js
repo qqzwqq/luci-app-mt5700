@@ -15,7 +15,10 @@
  */
 
 // 注入新样式
-var MT5700_CSS_VERSION = '2.46.9';
+// 2.46.9 → 2.46.10：mt5700.css 补了日志级别/方向/来源徽章的 .at-dark 提亮并调整
+// --mt5700-text-muted 暗色值。uhttpd 对静态资源恒给 Last-Modified: 1970，样式表
+// 失效只能靠这个版本戳，不递增的话老用户升级后仍是「代码已改、界面未变」。
+var MT5700_CSS_VERSION = '2.46.10';
 // 全局视觉修订层：弹窗文字可见性 + 后端未就绪提示条。
 // 这两项是**插件级组件**，不属于某个页面；本模块被 12 个视图全部 require，
 // 因此在这里注入即可一次覆盖所有页面（含只依赖 mt5700 的服务配置页）。
@@ -137,7 +140,7 @@ if (window.AtTheme) window.AtTheme.injectCss('/luci-static/resources/mt5700d/md3
 		applyChars();
 	}
 
-	/* 极简模式判定：全局背景层是否真正卸载 */
+	/* 极简模式判定：背景层与看板娘都靠它决定是否真正卸载 */
 	function isMinimal() {
 		try {
 			return !!(window.AtUimode && typeof window.AtUimode.current === 'function'
@@ -287,7 +290,7 @@ var Mt5700 = (function () {
 					if (typeof document === 'undefined' || !document.querySelectorAll) return;
 					var pages = document.querySelectorAll('.mt5700-page');
 					for (var i = 0; i < pages.length; i++) syncHero(pages[i]);
-				});
+});
 			}
 		} catch (e) { /* ignore */ }
 	}
@@ -636,6 +639,8 @@ var Mt5700 = (function () {
 		return svg;
 	};
 
+
+
 	/* ================= 四格动态信号图标 (cellular signal) =================
 	 *
 	 * 移植自 cellular-signal-preview.html：状态由 data-state 属性驱动，
@@ -780,8 +785,7 @@ var Mt5700 = (function () {
 		/* hero 按模式创建/移除；bindMode() 有单例守卫，多页不会重复注册事件 */
 		bindMode();
 		syncHero(node);
-
-		return node;
+return node;
 	};
 
 	/* ================= 卡片 ================= */

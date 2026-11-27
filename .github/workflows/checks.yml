@@ -55,11 +55,11 @@
 #      依赖网络、设备或特定操作系统）。tests/lib/ 存放被多个门禁共用的零依赖
 #      辅助模块（如 exec-mode.js），不匹配 *-test.js，不会被直接执行。
 #
-#   4) 作者署名约定：`我是挖洋镐的` 是本项目指定的作者署名标识。
+#   4) 作者署名约定：Fork 维护者署名为 `我是挖洋镐的`，上游原作者标识仍按原项目版权保留。
 #      · 页面 `admin/modem/5g/config`（视图 view/mt5700d/service.js）底部的
 #        署名「© 2026 我是挖洋镐的 · 开发与维护」、许可证标识
 #        「GPL-3.0-only」及其 GitHub 链接
-#        https://github.com/qqzwqq/luci-app-mt5700 属于明确要求保留的页面元素；
+#        https://github.com/qqzwqq/luci-app-mt5700 属于明确要求保留的 Fork 维护者署名链接；
 #      · 任何 UI 重构、样式优化、代码迁移、组件替换、模板重写、去重或 AI 自动修改，
 #        都必须保留该署名与链接，不得删除、隐藏、替换或破坏；
 #      · 改动该页面后须自查：署名是否仍在、链接地址是否正确、桌面端与移动端是否
@@ -175,7 +175,12 @@ jobs:
           done
 
   rust-unit:
-    name: Rust 单元测试与 Clippy
+    # 作业显示名 = 分支保护要求的必需检查 context。main 的 required status checks 是
+    # 「静态检查与单元测试」「Rust 单元测试」，此前这里叫「Rust 单元测试与 Clippy」，
+    # 名字对不上 → 必需检查永远不出现，PR 恒为 blocked，四项 CI 全绿也合不了。
+    # 以后想在这个名字里加词，先改分支保护的要求名，再改这里，别只改一边。
+    # Clippy 仍在本作业内执行（见下方「Clippy」步骤），名字短不代表不带它。
+    name: Rust 单元测试
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
