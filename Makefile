@@ -56,36 +56,17 @@ endef
 define Package/luci-app-mt5700/preinst
 #!/bin/sh
 [ -n "$${IPKG_INSTROOT}" ] || {
-	# 上次升级若已备份旧配置但迁移失败，必须保留备份供本次 postinst 重试。
-	# 只要旧文件仍在，就刷新备份；不能把上次失败留下的唯一副本先删掉。
-	if [ -f /etc/mt5700d-migrate/legacy-config ]; then
-		if [ -f /etc/config/at-webserver ] && ! cp -f /etc/config/at-webserver /etc/mt5700d-migrate/legacy-config; then
-			logger -t mt5700d "错误：无法刷新上次未完成迁移的旧配置备份，中止升级" 2>/dev/null || true
-			exit 1
-		fi
-		logger -t mt5700d "检测到上次未完成的 UCI 迁移，保留旧配置备份并重试" 2>/dev/null || true
-	else
-		rm -rf /etc/mt5700d-migrate
-		if [ -f /etc/config/at-webserver ]; then
-			if [ -f /etc/config/mt5700d ]; then
-				# 异常升级态：两份并存且无待重试备份时，保留较新的目标，旧文件留档。
-				if ! cp -f /etc/config/mt5700d /etc/config/mt5700d.pre-migration 2>/dev/null; then
-					logger -t mt5700d "错误：无法备份现有 mt5700d 配置，中止升级" 2>/dev/null || true
-					exit 1
-				fi
-				if ! mv -f /etc/config/at-webserver /etc/config/at-webserver.pre-migration 2>/dev/null; then
-					logger -t mt5700d "错误：无法留存旧 at-webserver 配置，中止升级" 2>/dev/null || true
-					exit 1
-				fi
-				logger -t mt5700d "UCI 新旧配置并存，已保留 mt5700d 并备份旧配置" 2>/dev/null || true
-			else
-				mkdir -p /etc/mt5700d-migrate
-				if ! cp -f /etc/config/at-webserver /etc/mt5700d-migrate/legacy-config; then
-					logger -t mt5700d "错误：无法在解包前备份旧 UCI 配置，中止升级以保护配置" 2>/dev/null || true
-					exit 1
-				fi
-				logger -t mt5700d "已在解包前保存旧 UCI 配置" 2>/dev/null || true
-			fi
+	rm -rf /etc/mt5700d-migrate
+	if [ -f /etc/config/at-webserver ]; then
+		if [ -f /etc/config/mt5700d ]; then
+			# 异常升级态：两份并存时保留较新的目标，旧文件留档供人工恢复。
+			cp -f /etc/config/mt5700d /etc/config/mt5700d.pre-migration 2>/dev/null || true
+			mv -f /etc/config/at-webserver /etc/config/at-webserver.pre-migration 2>/dev/null || true
+			logger -t mt5700d "UCI 新旧配置并存，已保留 mt5700d 并备份旧配置" 2>/dev/null || true
+		else
+			mkdir -p /etc/mt5700d-migrate
+			cp -f /etc/config/at-webserver /etc/mt5700d-migrate/legacy-config
+			logger -t mt5700d "已在解包前保存旧 UCI 配置" 2>/dev/null || true
 		fi
 	fi
 }
@@ -123,12 +104,7 @@ define Package/luci-app-mt5700/postinst
 	# /etc/config/mt5700d 并替换旧路径，再处理短信归档、用量、防火墙规则与
 	# 旧进程清理。脚本头的注释写了完整删除步骤。
 	# ---------------------------------------------------------------------
-	if [ -x /usr/libexec/mt5700d/migrate-legacy.sh ]; then
-		if ! /usr/libexec/mt5700d/migrate-legacy.sh; then
-			logger -t mt5700d "错误：旧版本数据迁移失败，停止新版服务安装流程；请检查迁移日志后手动恢复" 2>/dev/null || true
-			exit 1
-		fi
-	fi
+	[ -x /usr/libexec/mt5700d/migrate-legacy.sh ] && /usr/libexec/mt5700d/migrate-legacy.sh
 
 	# ---------------------------------------------------------------------
 	# 合并 apk/opkg 因「受保护路径」留下的 .apk-new
