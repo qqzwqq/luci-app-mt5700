@@ -78,7 +78,7 @@
 
 - 不递增的后果是「代码已改、界面未变」：清理或调样式会被浏览器缓存整段吞掉，甚至与旧缓存拼出不存在的组合。
 - `MT5700_UI_VERSION` 会并入 `L.env.resource_version`，是**所有** `require` 的版本分量；它与 `PKG_VERSION` 脱节时，升级后用户仍会加载旧模块（曾落后 9 个版本）。
-- `MT5700_CSS_VERSION` 同时用于 `mascot.png?v=`，递增会让看板娘图片重新拉取一次，属预期副作用。
+- Fork 的 Hero 标题栏不创建看板娘头像，也不请求 `mascot.png`；`MT5700_CSS_VERSION` 仅用于样式表缓存失效。短信会话内的联系人头像属于独立功能，不受此约定影响。
 - `.mt5700-author-label` 目前是占位选择器（视图已不再渲染该节点）；清理它属于样式改动，须递增 `MT5700_CSS_VERSION` 并同步 `tests/usage-source-test.js` 的基线断言。
 
 ### 响应式配置弹窗交互规范（Right Drawer / Modal Bottom Sheet）
