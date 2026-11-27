@@ -27,9 +27,8 @@
 #   3) 调用点各留一行，主流程保持可读。
 #
 # 幂等：每个动作都先判断来源存在且目标不存在，重复执行安全。
-# 数据安全优先：配置、短信归档、流量记录迁移失败，以及旧串口进程无法退出，
-# 都必须返回非零；调用方应停止启动新版服务并保留脚本供下次重试。
-# 非关键清理（例如旧目录已不存在）允许跳过，失败原因写 logger 供排查。
+# 尽力而为：任何单步失败都不阻断调用方（安装/开机的其余步骤更重要），
+# 失败原因写 logger 供排查。
 # ============================================================================
 
 set -u
@@ -44,59 +43,38 @@ log() { logger -t mt5700d "迁移: $*" 2>/dev/null || true; }
 # 1a. 正常升级：preinst 已在解包前保存旧配置。此刻新默认文件已经落地，
 #     必须用备份覆盖它，否则用户配置会被默认值顶掉。
 if [ -f /etc/mt5700d-migrate/legacy-config ]; then
-	# 先写同目录临时文件，转换成功后再原子替换目标；任何一步失败都保留
-	# preinst 备份与旧配置，绝不因磁盘空间不足/写入失败而删掉唯一副本。
-	if cp -f /etc/mt5700d-migrate/legacy-config /etc/config/mt5700d.migrating \
-		&& sed -i -e 's#at-webserver#mt5700d#g' \
-		          -e 's#at-notifications[.]log#mt5700d-notifications.log#g' \
-		          /etc/config/mt5700d.migrating \
-		&& mv -f /etc/config/mt5700d.migrating /etc/config/mt5700d; then
-		rm -rf /etc/mt5700d-migrate
-		# 旧文件若未被包管理器删除，留着会让 uci 同时加载两份配置
-		rm -f /etc/config/at-webserver
-		log "已用 preinst 保存的旧配置恢复 /etc/config/mt5700d"
-	else
-		rm -f /etc/config/mt5700d.migrating
-		log "错误：旧 UCI 配置迁移失败，已保留原始备份；请勿启动新版服务"
-		exit 1
-	fi
+	cp -f /etc/mt5700d-migrate/legacy-config /etc/config/mt5700d
+	sed -i -e 's#at-webserver#mt5700d#g' \
+	       -e 's#at-notifications[.]log#mt5700d-notifications.log#g' \
+	       /etc/config/mt5700d 2>/dev/null
+	rm -rf /etc/mt5700d-migrate
+	# 旧文件若未被包管理器删除，留着会让 uci 同时加载两份配置
+	rm -f /etc/config/at-webserver
+	log "已用 preinst 保存的旧配置恢复 /etc/config/mt5700d"
 fi
 
 # 1b. 兜底：只执行 uci-defaults、没有经过 preinst 的场景（刷机、手动解包、
 #     从备份恢复 overlay），旧文件仍在且目标尚不存在时直接搬迁。
 if [ -f /etc/config/at-webserver ] && [ ! -f /etc/config/mt5700d ]; then
-	if cp -f /etc/config/at-webserver /etc/config/mt5700d.migrating \
-		&& sed -i -e 's#at-webserver#mt5700d#g' \
-		          -e 's#at-notifications[.]log#mt5700d-notifications.log#g' \
-		          /etc/config/mt5700d.migrating \
-		&& mv -f /etc/config/mt5700d.migrating /etc/config/mt5700d; then
-		rm -f /etc/config/at-webserver
-		log "已将 UCI 配置迁移到 /etc/config/mt5700d"
-	else
-		rm -f /etc/config/mt5700d.migrating
-		log "错误：旧 UCI 配置迁移失败，已保留原始配置；请勿启动新版服务"
-		exit 1
-	fi
+	mv -f /etc/config/at-webserver /etc/config/mt5700d
+	sed -i -e 's#at-webserver#mt5700d#g' \
+	       -e 's#at-notifications[.]log#mt5700d-notifications.log#g' \
+	       /etc/config/mt5700d 2>/dev/null
+	log "已将 UCI 配置迁移到 /etc/config/mt5700d"
 fi
 
 # --- 2. 短信归档（overlay 上的用户数据，丢了不可恢复）------------------------
 # 只搬目录、不改内容：读端同时认新旧两种容器魔数，旧归档搬过去即可正常浏览；
 # 写入始终使用新魔数，旧文件在下次归档时自然被新格式覆盖。
 if [ -d /etc/at-webserver/SMS ] && [ ! -d /etc/mt5700d/SMS ]; then
-	if mkdir -p /etc/mt5700d && mv /etc/at-webserver/SMS /etc/mt5700d/SMS; then
-		log "已迁移旧短信归档到 /etc/mt5700d/SMS（旧格式仍可读取）"
-	else
-		log "错误：短信归档迁移失败，原始目录已保留；停止新版服务安装流程"
-		exit 1
-	fi
+	mkdir -p /etc/mt5700d
+	mv -f /etc/at-webserver/SMS /etc/mt5700d/SMS
+	log "已迁移旧短信归档到 /etc/mt5700d/SMS（旧格式仍可读取）"
 fi
 
 # --- 3. 月用量持久化 ---------------------------------------------------------
 if [ -f /etc/at-webserver-usage.json ] && [ ! -f /etc/mt5700d-usage.json ]; then
-	if ! mv /etc/at-webserver-usage.json /etc/mt5700d-usage.json; then
-		log "错误：流量记录迁移失败，原始文件已保留；停止新版服务安装流程"
-		exit 1
-	fi
+	mv -f /etc/at-webserver-usage.json /etc/mt5700d-usage.json
 fi
 
 rmdir /etc/at-webserver 2>/dev/null
@@ -109,10 +87,7 @@ for rule_name in at_webserver_wan_block at_webserver_wan_allow; do
 	rule_idx=$(uci show firewall 2>/dev/null | grep "\.name='$rule_name'" | cut -d'[' -f2 | cut -d']' -f1 | head -n1)
 	[ -n "$rule_idx" ] && uci delete firewall.@rule[$rule_idx] 2>/dev/null
 done
-if ! uci commit firewall 2>/dev/null; then
-	log "错误：旧防火墙规则清理未能提交，停止新版服务安装流程"
-	exit 1
-fi
+uci commit firewall 2>/dev/null
 
 # --- 5. 旧进程与旧文件 -------------------------------------------------------
 # 旧二进制必须删：它独占同一路 PCUI 串口，与 mt5700d 同时运行会互相抢锁，
@@ -127,10 +102,6 @@ fi
 [ -x /etc/init.d/at-webserver ] && /etc/init.d/at-webserver stop >/dev/null 2>&1
 killall -q at-webserver-rust 2>/dev/null || true
 sleep 1
-if pidof at-webserver-rust >/dev/null 2>&1; then
-	log "错误：旧版 at-webserver-rust 仍在运行并可能占用 PCUI 串口；停止新版服务安装流程"
-	exit 1
-fi
 rm -f /usr/bin/at-webserver-rust
 rm -f /etc/init.d/at-webserver
 rm -f /etc/rc.d/S99at-webserver /etc/rc.d/K10at-webserver

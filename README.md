@@ -6,7 +6,7 @@
 
 **适用于 OpenWrt / ImmortalWrt 平台的 MT5700M 5G 模组全功能控制中心与常驻守护套件**
 
-[![Version](https://img.shields.io/badge/Version-v2.1.1-3b82f6?style=flat-square&logo=git&logoColor=white)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-v2.1.2-3b82f6?style=flat-square&logo=git&logoColor=white)](CHANGELOG.md)
 [![OpenWrt CI](https://img.shields.io/github/actions/workflow/status/LianXia233/luci-app-mt5700/build-openwrt.yml?branch=main&label=Build%20OpenWrt&style=flat-square&logo=githubactions&logoColor=white)](https://github.com/LianXia233/luci-app-mt5700/actions/workflows/build-openwrt.yml)
 [![Static Checks](https://img.shields.io/github/actions/workflow/status/LianXia233/luci-app-mt5700/checks.yml?branch=main&label=Checks&style=flat-square&logo=githubactions&logoColor=white)](https://github.com/LianXia233/luci-app-mt5700/actions/workflows/checks.yml)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue?style=flat-square&logo=gnu&logoColor=white)](LICENSE)
@@ -636,7 +636,7 @@ Rust 后端依赖各自保留上游许可证。正式 APK / IPK 会附带逐项�
 
 ### 项目版权与维护
 
-原始项目代码版权归 **LianXia233** 所有；本 fork 的维护与适配由 **我是挖洋镐的** 负责。
+项目代码版权归 **LianXia233** 所有。
 
 ```text
 Copyright (C) 2026 LianXia233
@@ -647,8 +647,8 @@ SPDX-License-Identifier: GPL-3.0-only
 
 <div align="center">
 
-**我是挖洋镐的 · Fork 维护与适配**
+**LianXia233 · 开发与维护**
 
-[Fork 仓库](https://github.com/qqzwqq/luci-app-mt5700) · [提交 Issue](https://github.com/qqzwqq/luci-app-mt5700/issues) · [上游项目](https://github.com/LianXia233/luci-app-mt5700)
+[GitHub](https://github.com/LianXia233) · [项目仓库](https://github.com/LianXia233/luci-app-mt5700) · [提交 Issue](https://github.com/LianXia233/luci-app-mt5700/issues)
 
 </div>
